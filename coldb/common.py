@@ -25,6 +25,23 @@ COMPRESS_TYPE_SAME = 1
 COMPRESS_TYPE_PROGRESS = 2
 COMPRESS_TYPE_ENUM = 3
 
+IRANGE_DICT = {
+    'b': (-128, 127),
+    'B': (0, 255),
+    'h': (-32768, 32767),
+    'H': (0, 65535),
+    'l': (-2147483648, 2147483647),
+    'L': (0, 4294967295),
+}
+
+COMPRESS_DICT = {
+    None: COMPRESS_TYPE_PLAIN,
+    'plain': COMPRESS_TYPE_PLAIN,
+    'same': COMPRESS_TYPE_SAME,
+    'progress': COMPRESS_TYPE_PROGRESS,
+    'enum': COMPRESS_TYPE_ENUM,
+}
+
 
 def col_uniname(tablename, colname):
     return tablename + '__' + colname

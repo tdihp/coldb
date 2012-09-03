@@ -3,8 +3,18 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
+
+
+def _cmprow(idxarr, row1, row2):
+    for idx in idxarr:
+        c = cmp(row1[idx], row2[idx])
+        if c:
+            return c
+    return 0
+
+
 class Table(object):
-    def __init__(self, schema, idx, rows):
+    def __init__(self, schema, idx, colnames, pkey=None, skeys=None):
         self._schema = schema
         self._idx = idx
 
@@ -31,5 +41,5 @@ class Table(object):
     def catch_fkey(self):
         pass
 
-    def sort(self):
+    def sortrows(self):
         pass

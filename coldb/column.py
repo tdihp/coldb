@@ -11,12 +11,15 @@ def col_factory():
 
 
 class Column(object):
-    def __init__(self, schema, idx, tablename, name):
+    def __init__(self, schema, datatype, idx, tablename, name,):
         pass
 
     @property
     def schema(self):
         return self._schema
+
+    def datatype(self):
+        return self._datatype
 
     @property
     def tablename(self):
@@ -43,6 +46,11 @@ class Column(object):
 
 class SimpleColumn(Column):
     """ col for simple data types """
+    def compress(self, method):
+        pass
+
+    def minimum_type(self):
+        """figure out the minimum data type needed to store the array"""
 
 
 class StructColumn(Column):
