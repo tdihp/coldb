@@ -15,29 +15,28 @@ def _cmprow(idxarr, row1, row2):
 
 
 class Table(object):
-    def __init__(self, schema, idx, col_uninames, pkey=None, skeys=None):
+    """"""
+    def __init__(self, schema, idx, name, col_idxes, pkey=None, skeys=None):
+        """initial table, all cols should be idx"""
         self._schema = schema
         self._idx = idx
+        self._name = name
 
-
-        self._cols = list((schema.col_by_uniname[col_uniname].idx, col_uniname, schema.col_by_uniname[col_uniname]) for col_uniname in col_uninames)
-        cols = []
-        for col_uniname in col_uninames:
-            col = schema.col_by_uniname[col_uniname]
-            cols.append(col)
-        cols = sorted(cols, key=col.idx)
+        self._col_idxes = sorted(col_idxes)
+        self._pkey = pkey
+        self._skeys = skeys
 
     @property
     def schema(self):
-        pass
+        return self._schema
 
     @property
     def pkey(self):
-        pass
+        return self._pkey
 
     @property
     def skeys(self):
-        pass
+        return self._skeys
 
     @property
     def name(self):
@@ -47,6 +46,10 @@ class Table(object):
     def idx(self):
         pass
 
+    @property
+    def col_idxes(self):
+        return self._col_idxes
+
     def feed_rows(self, rows):
         pass
 
@@ -55,4 +58,14 @@ class Table(object):
 
     def sort_rows(self, rows):
 #        sort_idxarr = list(for row in rows)
-        pass
+        sortcols = []
+        if self.pkey:
+            sortcols.append(self.pkey)
+        if self.skeys:
+            sortcols.extend(self.skeys)
+        if not sortcols:
+            return rows
+
+        col_idxes = self.col_idxes
+        idx_list = list(col_idxes.index(sidx) for sidx in sortcols)
+        return sorted(rows, cmp=lambda a, b: _cmprow(idx_list, a, b))
