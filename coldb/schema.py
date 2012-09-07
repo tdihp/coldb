@@ -3,6 +3,9 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
+from table import Table
+
+
 class Schema(object):
     def __init__(self, config):
         #read config

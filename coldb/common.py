@@ -4,6 +4,8 @@ Created on Sep 2, 2012
 @author: pp
 '''
 ALIGN_BYTES = 4
+ALIGN_CHAR = '\0'
+
 
 # indicate sizes, pointing rows, size_counting
 POINTER_TYPE = 'H'
