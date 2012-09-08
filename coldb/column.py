@@ -5,6 +5,14 @@ Created on Sep 1, 2012
 '''
 from .common import col_uniname
 from .common import IRANGE_DICT
+from .compress import c_plain, c_run0, c_run1, c_enum
+
+
+COMPRESS_OPS = {
+    'run0': c_run0,
+    'run1': c_run1,
+    'enum': c_enum,
+}
 
 
 def _compare_type(dmin, dmax, comptypes, default):
@@ -20,7 +28,8 @@ def col_factory():
 
 
 class Column(object):
-    def __init__(self, schema, datatype, idx, tablename, name,):
+    def __init__(self, schema, idx, datatype, tablename, uniname,
+                 compress=None):
         pass
 
     @property
@@ -37,11 +46,7 @@ class Column(object):
 
     @property
     def name(self):
-        return self._name
-
-    @property
-    def uniname(self):
-        return col_uniname(self.tablename, self.name)
+        return self.uniname
 
     @property
     def idx(self):
@@ -78,7 +83,10 @@ class SimpleColumn(Column):
 
 class StructColumn(Column):
     """ a simple buffer struct column """
-
+    def minimum_type(self, col_data):
+        return '-'
 
 class BlobColumn(Column):
     """ undetermined length blob col """
+    def minimum_type(self, col_data):
+        return '-'

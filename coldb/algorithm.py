@@ -1,6 +1,7 @@
 import struct
 from cStringIO import StringIO
-from common import ALIGN_CHAR
+
+from .common import ALIGN_CHAR
 
 
 def run(diff, col):

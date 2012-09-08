@@ -10,13 +10,16 @@ ALIGN_CHAR = '\0'
 # indicate sizes, pointing rows, size_counting
 POINTER_TYPE = 'H'
 
+# used in enum compression only
+ENUM_TYPE = 'B'
+
 # XXX: not used
 IDX_TYPE = 'H'
 
 # rows
 S_TABLE_HEADER_STRUCT = 'H'
-# data_type, compress_type, size(* ALIGN_BYTES to bytes)
-# data_type: 
+# data_type, compress_type, size *ALIGN_BYTES to bytes*
+# data_type:
 # same as struct if the type changed
 # '-' if no change at all
 S_COL_HEADER_STRUCT = 'BBH'
