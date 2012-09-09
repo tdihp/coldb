@@ -16,13 +16,16 @@ def _cmprow(idxarr, row1, row2):
 
 class Table(object):
     """"""
-    def __init__(self, schema, idx, name, col_idxes, pkey=None, skeys=None, **kw):
-        """initial table, all cols should be idx"""
+    def __init__(self, schema, name, col_uninames, pkey=None, skeys=None, **kw):
+        """initial table, all cols should be idx
+
+        col_uninames is also used to indicate row data order
+        all column properties uses uniname
+        """
         self._schema = schema
-        self._idx = idx
         self._name = name
 
-        self._col_idxes = sorted(col_idxes)
+        self._col_uninames = col_uninames
         assert (not pkey) or (not skeys)
         self._pkey = pkey
         self._skeys = skeys
@@ -32,29 +35,22 @@ class Table(object):
         return self._schema
 
     @property
-    def idx(self):
-        pass
+    def name(self):
+        return self._name
 
     @property
-    def name(self):
-        pass
+    def col_uninames(self):
+        return self._col_uninames
 
     @property
     def pkey(self):
         return self._pkey
 
     @property
-    def col_idxes(self):
-        return self._col_idxes
-
-    @property
     def skeys(self):
         return self._skeys
 
     def feed_rows(self, rows):
-        pass
-
-    def catch_fkey(self):
         pass
 
     def sort_rows(self, rows):
@@ -67,6 +63,6 @@ class Table(object):
         if not sortcols:
             return rows
 
-        col_idxes = self.col_idxes
-        idx_list = list(col_idxes.index(sidx) for sidx in sortcols)
+        col_uninames = self.col_uninames
+        idx_list = list(col_uninames.index(snames) for snames in sortcols)
         return sorted(rows, cmp=lambda a, b: _cmprow(idx_list, a, b))

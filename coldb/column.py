@@ -28,33 +28,38 @@ def col_factory():
 
 
 class Column(object):
-    def __init__(self, schema, idx, uniname, datatype, tableidx,
-                 compress=None, pkey=False, fkey=None, **kw):
+    def __init__(self, schema, uniname, datatype, tablename,
+                 pkey=False, fkey=None, compress=None, **kw):
         self._schema = schema
-        self._idx = idx
         self._uniname = uniname
         self._datatype = datatype
-        self._tableidx = tableidx
+        self._tablename = tablename
+        self._pkey = pkey
+        self._fkey = fkey
 
     @property
     def schema(self):
         return self._schema
 
     @property
+    def uniname(self):
+        return self._uniname
+
+    @property
     def datatype(self):
         return self._datatype
 
     @property
-    def tableidx(self):
-        return self._tableidx
+    def tablename(self):
+        return self._tablename
 
     @property
-    def name(self):
-        return self._uniname
+    def pkey(self):
+        return self._pkey
 
     @property
-    def idx(self):
-        return self._idx
+    def fkey(self):
+        return self._fkey
 
     @property
     def compress(self):

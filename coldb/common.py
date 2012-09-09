@@ -41,6 +41,8 @@ COMPRESS_TYPES = [
     'enum',
 ]
 
+FKEY_RE = r'fkey\((?P<target>\w+)\)'
+
 
 def col_uniname(tablename, colname):
     return tablename + '__' + colname
