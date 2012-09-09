@@ -16,13 +16,14 @@ def _cmprow(idxarr, row1, row2):
 
 class Table(object):
     """"""
-    def __init__(self, schema, idx, name, col_idxes, pkey=None, skeys=None):
+    def __init__(self, schema, idx, name, col_idxes, pkey=None, skeys=None, **kw):
         """initial table, all cols should be idx"""
         self._schema = schema
         self._idx = idx
         self._name = name
 
         self._col_idxes = sorted(col_idxes)
+        assert (not pkey) or (not skeys)
         self._pkey = pkey
         self._skeys = skeys
 
@@ -31,24 +32,24 @@ class Table(object):
         return self._schema
 
     @property
-    def pkey(self):
-        return self._pkey
-
-    @property
-    def skeys(self):
-        return self._skeys
+    def idx(self):
+        pass
 
     @property
     def name(self):
         pass
 
     @property
-    def idx(self):
-        pass
+    def pkey(self):
+        return self._pkey
 
     @property
     def col_idxes(self):
         return self._col_idxes
+
+    @property
+    def skeys(self):
+        return self._skeys
 
     def feed_rows(self, rows):
         pass

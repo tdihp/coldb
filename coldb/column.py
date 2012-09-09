@@ -3,8 +3,8 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
-from .common import col_uniname
 from .common import IRANGE_DICT
+from .common import COMPRESS_TYPES
 from .compress import c_plain, c_run0, c_run1, c_enum
 
 
@@ -28,9 +28,13 @@ def col_factory():
 
 
 class Column(object):
-    def __init__(self, schema, idx, datatype, tablename, uniname,
-                 compress=None):
-        pass
+    def __init__(self, schema, idx, uniname, datatype, tableidx,
+                 compress=None, pkey=False, fkey=None, **kw):
+        self._schema = schema
+        self._idx = idx
+        self._uniname = uniname
+        self._datatype = datatype
+        self._tableidx = tableidx
 
     @property
     def schema(self):
@@ -41,28 +45,20 @@ class Column(object):
         return self._datatype
 
     @property
-    def tablename(self):
-        return self._tablename
+    def tableidx(self):
+        return self._tableidx
 
     @property
     def name(self):
-        return self.uniname
+        return self._uniname
 
     @property
     def idx(self):
-        pass
+        return self._idx
 
-    def write_data(self, arr):
-        pass
-
-    def try_compress(self):
-        pass
-
-
-class SimpleColumn(Column):
-    """ col for simple data types """
-    def compress(self, method):
-        pass
+    @property
+    def compress(self):
+        return self._compress
 
     def minimum_type(self, col_data):
         """figure out the minimum data type needed to store the array"""
@@ -77,16 +73,27 @@ class SimpleColumn(Column):
             'L': 'BH',
         }
         dt = self.datatype
-        assert dt in conv_table
+        if not dt in conv_table:
+            return dt
         test_ts = conv_table[dt]
         return _compare_type(dmin, dmax, test_ts, dt)
 
-class StructColumn(Column):
-    """ a simple buffer struct column """
-    def minimum_type(self, col_data):
-        return '-'
+    def write_data(self, arr):
+        """returns colinfo block and data block"""
+        min_type = self.minimum_type(arr)
+        cf, data = self.try_compress(min_type, arr)
+        store_type = min_type
+        if store_type not in ('b', 'B', 'h', 'H', 'l', 'L'):
+            store_type = '-'
+        compression_id = COMPRESS_TYPES.index(cf)
+        return store_type, compression_id, data
 
-class BlobColumn(Column):
-    """ undetermined length blob col """
-    def minimum_type(self, col_data):
-        return '-'
+    def try_compress(self, val_type, arr):
+        plain_data = c_plain(val_type, arr)
+        comp_dict = dict()
+        for cf in self.compress:
+            comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr)
+        comp_dict['plain'] = plain_data
+        min_cf, min_bin = min(((cf, cbin) for cf, cbin in comp_dict.items()),
+            key=lambda c, b: len(b))
+        return min_cf, min_bin

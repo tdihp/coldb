@@ -1,0 +1,35 @@
+tables:
+  - name: person
+    pkey: person_id
+    cols:
+      - name: person_id
+        datatype: L
+      - name: tel
+        datatype: 11s
+      - name: email
+        datatype: blob
+
+  - name: groups
+    pkey: group_id
+    cols:
+      - name: group_id
+        datatype: H
+      - name: group_name
+        datatype: blob
+
+  - name: group2person
+    skeys:
+      - person_id
+      - group_id
+    cols:
+      - name: person_id
+        datatype: fkey(person)
+      - name: group_id
+        datatype: fkey(groups)
+      - name: status
+        datatype: B
+      - name: register_date
+        datatype: L
+      - name: end_date
+        datatype: L
+

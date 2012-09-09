@@ -22,13 +22,8 @@ S_TABLE_HEADER_STRUCT = 'H'
 # data_type:
 # same as struct if the type changed
 # '-' if no change at all
-S_COL_HEADER_STRUCT = 'BBH'
+S_COL_HEADER_STRUCT = 'cBH'
 
-# compress types
-COMPRESS_TYPE_PLAIN = 0
-COMPRESS_TYPE_SAME = 1
-COMPRESS_TYPE_PROGRESS = 2
-COMPRESS_TYPE_ENUM = 3
 
 IRANGE_DICT = {
     'b': (-128, 127),
@@ -39,13 +34,12 @@ IRANGE_DICT = {
     'L': (0, 4294967295),
 }
 
-COMPRESS_DICT = {
-    None: COMPRESS_TYPE_PLAIN,
-    'plain': COMPRESS_TYPE_PLAIN,
-    'same': COMPRESS_TYPE_SAME,
-    'progress': COMPRESS_TYPE_PROGRESS,
-    'enum': COMPRESS_TYPE_ENUM,
-}
+COMPRESS_TYPES = [
+    'plain',
+    'run0',
+    'run1',
+    'enum',
+]
 
 
 def col_uniname(tablename, colname):
