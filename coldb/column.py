@@ -23,7 +23,7 @@ def _compare_type(dmin, dmax, comptypes, default):
     return default
 
 
-def col_factory():
+class ColumnError(Exception):
     pass
 
 
@@ -64,6 +64,17 @@ class Column(object):
     @property
     def compress(self):
         return self._compress
+
+    def __repr__(self):
+        return 'Column(%s)' % self.uniname
+
+    def validate(self):
+        # check fkey
+        if self.fkey:
+            ftable = self.schema.table_by_name[self.fkey]
+            ftarget = self.schema.col_by_uniname[ftable.pkey]
+            if ftarget.fkey:
+                raise ColumnError("%s is fkey itself, cannot be targeted")
 
     def minimum_type(self, col_data):
         """figure out the minimum data type needed to store the array"""

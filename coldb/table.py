@@ -3,7 +3,6 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
-from .common import col_uniname
 
 
 def _cmprow(idxarr, row1, row2):
@@ -49,6 +48,12 @@ class Table(object):
     @property
     def skeys(self):
         return self._skeys
+
+    def __repr__(self):
+        return 'Table(%s)' % self.name
+
+    def validate(self):
+        pass
 
     def feed_rows(self, rows):
         pass

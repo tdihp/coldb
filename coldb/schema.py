@@ -20,8 +20,10 @@ class Schema(object):
         self._tables = []
         self._cols = []
         self._read_config(config)
-        print self.table_by_name
-        print self.col_by_uniname
+        self.validate()
+
+    def __repr__(self):
+        return "Schema(%s)" % (', '.join(self.table_by_name.keys()))
 
     @property
     def table_by_name(self):
@@ -60,29 +62,9 @@ class Schema(object):
                 self._cols.append(Column(self, **c_config))
             self._tables.append(Table(self, **t_config))
 
-
-        # process fkeys
-        # fireup initializing
-
-
-
-
-    def add_table(self, t_config):
-#        assert t_name not in self.table_by_name
-
-
-
-        for c_config in t_config['cols']:
-            c_config['idx'] = self.gen_idx()
-            c_name = c_config['name']
-
-
-            c = Column(self, **c_config)
-            t_config['col_idxes'].append(c_config['idx'])
-            self._cols.append(c)
-        pkey_name = c_config['tableidx']
-        t = Table(self, **t_config)
-        self._tables.append(t)
-
-    def add_column(self, t_name, c_name, c_config):
-        pass
+    def validate(self):
+        """check all tables and columns"""
+        for table in self._tables:
+            table.validate()
+        for col in self._cols:
+            col.validate()
