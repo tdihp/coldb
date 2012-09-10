@@ -4,6 +4,7 @@ tables:
     cols:
       - name: person_id
         datatype: L
+        compress: [run1]
       - name: tel
         datatype: 11s
       - name: email
@@ -24,12 +25,17 @@ tables:
     cols:
       - name: person_id
         datatype: fkey(person)
+        compress: [run0, run1, enum]
       - name: group_id
         datatype: fkey(groups)
+        compress: [run0, run1, enum]
       - name: status # 1 for new, 2 for old 
         datatype: B
+        compress: [run0, run1]
       - name: register_date
         datatype: L
+        compress: [run0, run1, enum]
       - name: end_date
         datatype: L
+        compress: [run0, run1, enum]
 
