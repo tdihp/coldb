@@ -15,6 +15,9 @@ class CompressFailed(Exception):
     pass
 
 
+class CompressError(Exception):
+    pass
+
 def c_plain(col_type, col):
     """ the default non-compression approach """
     if col_type in ('b', 'B', 'h', 'H', 'l', 'L'):
@@ -26,18 +29,22 @@ def c_plain(col_type, col):
 
 
 def c_plain_normal(col_type, col):
-    assert col_type in ('b', 'B', 'h', 'H', 'l', 'L')
+    if not col_type in ('b', 'B', 'h', 'H', 'l', 'L'):
+        raise CompressError("col type %s isn't normal" % col_type)
+
     return array_packing((col_type, col))
 
 
 def c_plain_struct(col_type, col):
-    assert re.match(r'^\d+s$', col_type)
+    if not re.match(r'^\d+s$', col_type):
+        raise CompressError("col type %s isn't struct" % col_type)
     mystruct = struct.Struct(col_type)
     return ''.join(mystruct.pack(val) for val in col)
 
 
 def c_plain_blob(col_type, col):
-    assert 'blob' == col_type
+    if 'blob' != col_type:
+        raise CompressError("col type %s isn't blob" % col_type)
     start_list = []
     cnt_list = []
     mybuffer = StringIO()
@@ -57,7 +64,8 @@ def c_plain_blob(col_type, col):
 
 
 def c_run0(col_type, col):
-    assert col_type in ('b', 'B', 'h', 'H', 'l', 'L')
+    if not col_type in ('b', 'B', 'h', 'H', 'l', 'L'):
+        raise CompressError("col type %s cannot do run0" % col_type)
     rowlist, vallist = run(0, col)
     rowcnt = len(rowlist)
     result = array_packing((POINTER_TYPE, [rowcnt] + rowlist),
@@ -66,7 +74,8 @@ def c_run0(col_type, col):
 
 
 def c_run1(col_type, col):
-    assert col_type in ('b', 'B', 'h', 'H', 'l', 'L')
+    if not col_type in ('b', 'B', 'h', 'H', 'l', 'L'):
+        raise CompressError("col type %s cannot do run1" % col_type)
     rowlist, vallist = run(1, col)
     rowcnt = len(rowlist)
     result = array_packing((POINTER_TYPE, [rowcnt] + rowlist),
@@ -75,7 +84,11 @@ def c_run1(col_type, col):
 
 
 def c_enum(col_type, col):
-    assert col_type in ('h', 'H', 'l', 'L')  # enum of bytes is useless
+    if not col_type in ('b', 'B', 'h', 'H', 'l', 'L'):
+        raise CompressError("col type %s cannot do enum" % col_type)
+    # enum of bytes is useless
+    if not col_type in ('h', 'H', 'l', 'L'):
+        raise CompressFailed("data is already 1 byte, enum compress is not useful")
     enumlist, newvallist = enum(col)
     enumcnt = len(enumlist)
     result = array_packing((ENUM_TYPE, [enumcnt] + newvallist),

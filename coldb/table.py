@@ -3,9 +3,6 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
-import struct
-from .common import POINTER_TYPE
-
 def _cmprow(idxarr, row1, row2):
     for idx in idxarr:
         c = cmp(row1[idx], row2[idx])
@@ -79,4 +76,4 @@ class Table(object):
         return sorted(rows, cmp=lambda a, b: _cmprow(idx_list, a, b))
 
     def get_data(self):
-        return struct.pack(POINTER_TYPE, len(self.rows))
+        return len(self.rows)

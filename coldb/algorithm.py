@@ -2,6 +2,7 @@ import struct
 from cStringIO import StringIO
 
 from .common import ALIGN_CHAR
+from .common import IRANGE_DICT
 
 
 def run(diff, col):
@@ -28,6 +29,10 @@ def enum(col):
 def align2pitch(inputlen, pitch):
     tail = inputlen % pitch
     return pitch - tail
+
+
+def pitched_len(inputlen, pitch):
+    return inputlen + align2pitch(inputlen, pitch)
 
 
 def array_packing(arrdef, *more_arrdef):
@@ -57,3 +62,44 @@ def array_packing(arrdef, *more_arrdef):
     rtn = mybuffer.getvalue()
     mybuffer.close()
     return rtn
+
+
+def _compare_type(dmin, dmax, comptypes, default):
+    for t in comptypes:
+        tmin, tmax = IRANGE_DICT[t]
+        if tmin <= dmin and dmax <= tmax:
+            return t
+    return default
+
+
+def minimum_type(default_type, col_data):
+    """figure out the minimum data type needed to store the array"""
+    dmin = min(col_data)
+    dmax = max(col_data)
+    conv_table = {
+        'b': '',
+        'B': '',
+        'h': 'b',
+        'H': 'B',
+        'l': 'bh',
+        'L': 'BH',
+    }
+    dt = default_type
+    if not dt in conv_table:
+        return dt
+    test_ts = conv_table[dt]
+    return _compare_type(dmin, dmax, test_ts, dt)
+
+def make_aligned_blocks(pitch, *blocks):
+    mybuffer = StringIO()
+    cur_size = 0
+    for block in blocks:
+        align = align2pitch(cur_size, pitch)
+        if align:
+            mybuffer.write(ALIGN_CHAR * align)
+        mybuffer.write(block)
+    result = mybuffer.getvalue()
+    mybuffer.close()
+    return result
+
+

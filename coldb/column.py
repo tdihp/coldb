@@ -3,24 +3,20 @@ Created on Sep 1, 2012
 
 @author: pp
 '''
-from .common import IRANGE_DICT
-from .common import COMPRESS_TYPES
-from .compress import c_plain, c_run0, c_run1, c_enum
+import logging
 
+from .common import COMPRESS_TYPES
+from .common import ALIGN_BYTES
+from .compress import c_plain, c_run0, c_run1, c_enum
+from .compress import CompressFailed
+from .algorithm import minimum_type
+from .algorithm import pitched_len
 
 COMPRESS_OPS = {
     'run0': c_run0,
     'run1': c_run1,
     'enum': c_enum,
 }
-
-
-def _compare_type(dmin, dmax, comptypes, default):
-    for t in comptypes:
-        tmin, tmax = IRANGE_DICT[t]
-        if tmin <= dmin and dmax <= tmax:
-            return t
-    return default
 
 
 class ColumnError(Exception):
@@ -37,6 +33,7 @@ class Column(object):
         self._pkey = pkey
         self._fkey = fkey
         self._compress = compress
+        self.logger = logging.getLogger('coldb.column')
 
     @property
     def schema(self):
@@ -83,28 +80,10 @@ class Column(object):
             if ftarget.fkey:
                 raise ColumnError("%s is fkey itself, cannot be targeted")
 
-    def minimum_type(self, col_data):
-        """figure out the minimum data type needed to store the array"""
-        dmin = min(col_data)
-        dmax = max(col_data)
-        conv_table = {
-            'b': '',
-            'B': '',
-            'h': 'b',
-            'H': 'B',
-            'l': 'bh',
-            'L': 'BH',
-        }
-        dt = self.datatype
-        if not dt in conv_table:
-            return dt
-        test_ts = conv_table[dt]
-        return _compare_type(dmin, dmax, test_ts, dt)
-
     def get_data(self):
         """returns colinfo block and data block"""
         arr = self.arr
-        min_type = self.minimum_type(arr)
+        min_type = minimum_type(self.datatype, arr)
         cf, data = self.try_compress(min_type, arr)
         store_type = min_type
         if store_type not in ('b', 'B', 'h', 'H', 'l', 'L'):
@@ -116,8 +95,31 @@ class Column(object):
         plain_data = c_plain(val_type, arr)
         comp_dict = dict()
         for cf in self.compress:
-            comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr)
+            try:
+                comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr)
+            except CompressFailed as e:
+                self.logger.info(e)
         comp_dict['plain'] = plain_data
-        min_cf, min_bin = min(((cf, cbin) for cf, cbin in comp_dict.items()),
-            key=lambda x: len(x[1]))
+
+        def compare(a, b):
+            """smaller is better"""
+            acf, acbin = a
+            bcf, bcbin = b
+            albin = len(acbin)
+            blbin = len(bcbin)
+            albin = pitched_len(albin, ALIGN_BYTES)
+            blbin = pitched_len(blbin, ALIGN_BYTES)
+            r = cmp(albin, blbin)
+            if r:
+                return r
+
+            if acf == 'plain':
+                return -1
+            elif bcf == 'plain':
+                return 1
+
+            return 0
+
+        min_cf, min_bin = sorted(((cf, cbin) for cf, cbin in comp_dict.items()),
+            cmp=compare)[0]
         return min_cf, min_bin

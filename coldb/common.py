@@ -16,6 +16,8 @@ ENUM_TYPE = 'B'
 # XXX: not used
 IDX_TYPE = 'H'
 
+# header uses 2 magic words
+S_PACKAGE_HEADER_STRUCT = 'HH'
 # rows
 S_TABLE_HEADER_STRUCT = 'H'
 # data_type, compress_type, size *ALIGN_BYTES to bytes*
