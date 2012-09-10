@@ -22,7 +22,7 @@ def c_plain(col_type, col):
     elif re.match(r'^\d+s$', col_type):
         return c_plain_struct(col_type, col)
     elif 'blob' == col_type:
-        return c_plain_blob(col_type)
+        return c_plain_blob(col_type, col)
 
 
 def c_plain_normal(col_type, col):
@@ -40,7 +40,7 @@ def c_plain_blob(col_type, col):
     assert 'blob' == col_type
     start_list = []
     cnt_list = []
-    mybuffer = StringIO
+    mybuffer = StringIO()
     cur_pos = 0
     for val in col:
         l = len(val)

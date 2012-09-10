@@ -26,7 +26,7 @@ tables:
         datatype: fkey(person)
       - name: group_id
         datatype: fkey(groups)
-      - name: status
+      - name: status # 1 for new, 2 for old 
         datatype: B
       - name: register_date
         datatype: L

@@ -68,3 +68,16 @@ class Schema(object):
             table.validate()
         for col in self._cols:
             col.validate()
+
+    def make_data(self, data):
+        tabledict = self.table_by_name
+        for tablename, rows in data.items():
+            assert tablename in tabledict
+            tabledict[tablename].set_rows(rows)
+
+        for table in self._tables:
+            print len(table.get_data())
+
+        for col in self._cols:
+            print col.get_data()
+

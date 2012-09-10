@@ -36,6 +36,7 @@ class Column(object):
         self._tablename = tablename
         self._pkey = pkey
         self._fkey = fkey
+        self._compress = compress
 
     @property
     def schema(self):
@@ -63,7 +64,13 @@ class Column(object):
 
     @property
     def compress(self):
-        return self._compress
+        compress = self._compress
+        if compress is None:
+            return ()
+        return compress
+
+    def set_arr(self, arr):
+        self.arr = arr
 
     def __repr__(self):
         return 'Column(%s)' % self.uniname
@@ -94,8 +101,9 @@ class Column(object):
         test_ts = conv_table[dt]
         return _compare_type(dmin, dmax, test_ts, dt)
 
-    def write_data(self, arr):
+    def get_data(self):
         """returns colinfo block and data block"""
+        arr = self.arr
         min_type = self.minimum_type(arr)
         cf, data = self.try_compress(min_type, arr)
         store_type = min_type
@@ -111,5 +119,5 @@ class Column(object):
             comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr)
         comp_dict['plain'] = plain_data
         min_cf, min_bin = min(((cf, cbin) for cf, cbin in comp_dict.items()),
-            key=lambda c, b: len(b))
+            key=lambda x: len(x[1]))
         return min_cf, min_bin

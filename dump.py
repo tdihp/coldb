@@ -8,7 +8,11 @@ def main():
         ymldata = f.read()
     config = load(ymldata)
 
-    print schema.Schema(config)
+    s = schema.Schema(config)
+    with open('sampledata.yml', 'rb') as f:
+        data = f.read()
+    data = load(data)
+    s.make_data(data)
 
 if __name__ == '__main__':
     main()
