@@ -76,4 +76,6 @@ class Table(object):
         return sorted(rows, cmp=lambda a, b: _cmprow(idx_list, a, b))
 
     def get_data(self):
-        return len(self.rows)
+        l = len(self.rows)
+        del self.rows
+        return l

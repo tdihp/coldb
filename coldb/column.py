@@ -4,6 +4,7 @@ Created on Sep 1, 2012
 @author: pp
 '''
 import logging
+from bisect import bisect_left
 
 from .common import COMPRESS_TYPES
 from .common import ALIGN_BYTES
@@ -67,7 +68,20 @@ class Column(object):
         return compress
 
     def set_arr(self, arr):
-        self.arr = arr
+        fkey = self.fkey
+        if fkey:
+            target_table = self.schema.table_by_name[fkey]
+            target = self.schema.col_by_uniname[target_table.pkey]
+            # target's arr must set already
+            farr = []
+            tarr = target.arr
+            for val in arr:
+                i = bisect_left(tarr, val)
+                assert tarr[i] == val
+                farr.append(i)
+            self.arr = farr
+        else:
+            self.arr = arr
 
     def __repr__(self):
         return 'Column(%s)' % self.uniname
@@ -83,6 +97,7 @@ class Column(object):
     def get_data(self):
         """returns colinfo block and data block"""
         arr = self.arr
+        del self.arr
         min_type = minimum_type(self.datatype, arr)
         cf, data = self.try_compress(min_type, arr)
         store_type = min_type
@@ -90,6 +105,8 @@ class Column(object):
             store_type = '-'
         compression_id = COMPRESS_TYPES.index(cf)
         return store_type, compression_id, data
+
+
 
     def try_compress(self, val_type, arr):
         plain_data = c_plain(val_type, arr)
