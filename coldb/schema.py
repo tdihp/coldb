@@ -73,9 +73,14 @@ class Schema(object):
     def make_data(self, data):
         tabledict = self.table_by_name
         coldict = self.col_by_uniname
-        for tablename, rows in data.items():
-            assert tablename in tabledict
-            tabledict[tablename].set_rows(rows)
+        # for tablename, rows in data.items():
+            # assert tablename in tabledict
+            # tabledict[tablename].set_rows(rows)
+            
+        for table in self._tables:
+            tablename = table.name
+            table.set_rows(data[tablename])
+            
         package_header_struct = Struct(S_PACKAGE_HEADER_STRUCT)
         table_header_struct = Struct(S_TABLE_HEADER_STRUCT)
         col_header_struct = Struct(S_COL_HEADER_STRUCT)

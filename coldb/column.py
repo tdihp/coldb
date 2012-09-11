@@ -101,7 +101,7 @@ class Column(object):
         min_type = minimum_type(self.datatype, arr)
         cf, data = self.try_compress(min_type, arr)
         store_type = min_type
-        if store_type not in ('b', 'B', 'h', 'H', 'l', 'L'):
+        if store_type not in ('b', 'B', 'h', 'H', 'i', 'I'):
             store_type = '-'
         compression_id = COMPRESS_TYPES.index(cf)
         return store_type, compression_id, data

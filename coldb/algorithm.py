@@ -1,4 +1,4 @@
-import struct
+from struct import Struct
 from cStringIO import StringIO
 
 from .common import ALIGN_CHAR
@@ -41,12 +41,14 @@ def array_packing(arrdef, *more_arrdef):
     take care of alignments between arrays
     """
     arrtype, arr = arrdef
-    last_bytes = struct.calcsize(arrtype)
+    mystruct = Struct(arrtype)
+    last_bytes = mystruct.size
     cur_size = last_bytes * len(arr)
     mybuffer = StringIO()
-    mybuffer.write(struct.pack('%d%s' % (len(arr), arrtype), *arr))
+    mybuffer.write(''.join(mystruct.pack(val) for val in arr))
     for arrtype, arr in more_arrdef:
-        cur_bytes = struct.calcsize(arrtype)
+        mystruct = Struct(arrtype)
+        cur_bytes = mystruct.size
         if cur_bytes > last_bytes:
             # align the string
             fill_bytes = align2pitch(cur_size, cur_bytes)
@@ -55,7 +57,7 @@ def array_packing(arrdef, *more_arrdef):
 
             # write this arr
             cur_size = last_bytes * len(arr)
-            mybuffer.write(struct.pack('%d%s' % (len(arr), arrtype), *arr))
+            mybuffer.write(''.join(mystruct.pack(val) for val in arr))
 
             # leave notes
             last_bytes = cur_bytes
@@ -81,8 +83,8 @@ def minimum_type(default_type, col_data):
         'B': '',
         'h': 'b',
         'H': 'B',
-        'l': 'bh',
-        'L': 'BH',
+        'i': 'bh',
+        'I': 'BH',
     }
     dt = default_type
     if not dt in conv_table:
