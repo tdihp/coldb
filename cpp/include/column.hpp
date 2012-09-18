@@ -17,6 +17,7 @@ public:
   virtual DataType get(PKGPT rowid) = 0;  // get the item in rowid row
 };
 
+
 // abstract interface of sorted column for findings
 template <typename DataType>
 class SortedColumn : public virtual Column<DataType> {
