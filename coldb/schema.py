@@ -103,5 +103,5 @@ class Schema(object):
                     col_data_list.append(data)
         package_header = package_header_struct.pack(0, 0)
         table_header_struct = ''.join(table_header_list)
-
-        return make_aligned_blocks(ALIGN_BYTES, package_header, table_header_struct, *col_data_list)
+        col_header_struct = ''.join(col_header_list)
+        return make_aligned_blocks(ALIGN_BYTES, package_header, table_header_struct, col_header_struct, *col_data_list)

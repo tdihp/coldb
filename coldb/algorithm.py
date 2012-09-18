@@ -28,7 +28,9 @@ def enum(col):
 
 def align2pitch(inputlen, pitch):
     tail = inputlen % pitch
-    return pitch - tail
+    if tail:
+        return pitch - tail
+    return 0
 
 
 def pitched_len(inputlen, pitch):
@@ -99,7 +101,9 @@ def make_aligned_blocks(pitch, *blocks):
         align = align2pitch(cur_size, pitch)
         if align:
             mybuffer.write(ALIGN_CHAR * align)
+            cur_size += align
         mybuffer.write(block)
+        cur_size += len(block)
     result = mybuffer.getvalue()
     mybuffer.close()
     return result
