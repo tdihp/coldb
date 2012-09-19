@@ -1,57 +1,62 @@
 #ifndef INCLUDED_COLDB_COLUMN_HPP
 #define INCLUDED_COLDB_COLUMN_HPP
 
+#include <algorithm>
 #include "types.hpp"
 
+namespace coldb{
+
 // abstract interface of all column objects
-template <typename DataType>
+// IFType: type of interface
+// ACType: type of actual storage
+template <typename IFType>
 class Column{
 private:
-  const DATA_PTR data_ptr;
+  const DATA_PTR data_ptr_;
 public:
-  const PKGPT size;
+  const I32 size_;
 public:
-  Column(const DATA_PTR data_ptr, const PKGPT size) : data_ptr(data_ptr), size(size) {};
+  Column(const DATA_PTR data_ptr, const I32 size)
+    : data_ptr_(data_ptr), size_(size) {}
   virtual ~Column(){}
-  virtual PKGPT get_size() = 0;  // get size of Column
-  virtual DataType get(PKGPT rowid) = 0;  // get the item in rowid row
+  virtual IFType get(I32 rowid) = 0;  // get the item in rowid row
 };
-
 
 // abstract interface of sorted column for findings
-template <typename DataType>
-class SortedColumn : public virtual Column<DataType> {
-  virtual PKGPT find(DataType var);  // find the row of target value
+template <typename IFType>
+class SortedColumn : public virtual Column<IFType, ACType> {
+  virtual I32 find(IFType var);  // find the row of target value
 };
 
-template <typename DataType>
-class PlainColumn : public Column<DataType>{
-private:
-  const DataType* ptr;
-  const COLPT size;
-  COLPT cur_row;
+
+template <typename IFType, typename ACType>
+class PlainColumn : public Column<IFType>{
 public:
-  PlainColumn(const DataType* ptr, const COLPT size)
-    : ptr(ptr), size(size), cur_row(0)
-  {};
-  COLPT get_size() {return size;}
-  DataType get(COLPT i) {return ptr[i];}
-  DataType next() {;}
+  IFType get(I32 rowid) {return (IFType)(((ACType*)ptr)[i]);}
 };
 
-template <typename DataType>
-class SortedPlainColumn : public PlainColumn<DataType>, public SortedColumn<DataType> {
-private:
-  const DataType* ptr;
-  const COLPT size;
-  COLPT cur_row;
+template <typename IFType, typename ACType>
+class SortedPlainColumn
+  : public PlainColumn<IFType, ACType>, public SortedColumn<IFType>
+{
 public:
-  SortedPlainColumn(const DataType* ptr, const COLPT size)
-    : ptr(ptr), size(size), cur_row(0)
-  {};
-  COLPT get_size() {return size;}
-  DataType get(COLPT i) {return ptr[i];}
-  DataType next() {;}
+  I32 find(IFType var)
+  {
+    ACType* data = (ACType*)data_ptr_;
+    I32 i = std::lower_bound(data, data + size_, (ACType)var);
+    if(data[i] == (ACType)var)
+    {
+      return i;
+    }
+    return -1;
+  }
 };
 
+template <typename IFType, typename ACType>
+class Run0Column : public Column<IFType>{
+public:
+  IFType get(I32 rowid) {return (IFType)(((ACType*)ptr)[i]);}
+};
+
+}
 #endif

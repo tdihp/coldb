@@ -1,5 +1,6 @@
 #ifndef INCLUDED_COLDB_TYPES_HPP
 #define INCLUDED_COLDB_TYPES_HPP
+namespace coldb{
 // storage data types
 typedef signed char I8;
 typedef unsigned char U8;
@@ -12,6 +13,6 @@ typedef unsigned int U32;
 typedef unsigned short COLPT;
 typedef unsigned int PKGPT;
 typedef char* DATA_PTR;
-
+}
 #endif
 
