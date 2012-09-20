@@ -51,20 +51,23 @@ public:
   I32 find(IFType var){return impl_.find(var);}
 }
 
-template <typename IFType, typename ACType>
-class PlainColumn : public Column<IFType>{
-public:
-  IFType get(I32 rowid) {return (IFType)(((ACType*)ptr)[i]);}
-};
+template <typename IFType>
+class FKeyColumn : virtual public Column<IFType>
+{}
 
-template <typename IFType, typename ACType>
-class SortedPlainColumn
-  : public PlainColumn<IFType, ACType>, public SortedColumn<IFType>
+template <typename IFType, class Impl, class TgtImpl>
+class FKeyColumnImpl : public FKeyColumn<IFType>
+{}
+
+
+template <typename DT>
+class PlainImpl
 {
 public:
-  I32 find(IFType var)
+  IFType get(I32 rowid) {return ((DT*)ptr)[i];}
+  I32 find(DT var)
   {
-    ACType* data = (ACType*)data_ptr_;
+    DT* data = (DT*)data_ptr_;
     I32 i = std::lower_bound(data, data + size_, (ACType)var);
     if(data[i] == (ACType)var)
     {
@@ -75,7 +78,15 @@ public:
 };
 
 template <typename IFType, typename ACType>
-class Run0Column : public Column<IFType>{
+class SortedPlainColumn
+  : public PlainColumn<IFType, ACType>, public SortedColumn<IFType>
+{
+public:
+
+};
+
+template <typename IFType, typename ACType>
+class Run0Impl : public Column<IFType>{
 public:
   IFType get(I32 rowid) {return (IFType)(((ACType*)ptr)[i]);}
 };
