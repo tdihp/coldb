@@ -10,17 +10,28 @@ namespace coldb{
 // IFType: type of interface
 // ACType: type of actual storage
 template <typename IFType>
-class Column{
-private:
-  const DATA_PTR data_ptr_;
+class Column
+{
 public:
-  const I32 size_;
-public:
-  Column(const DATA_PTR data_ptr, const I32 size)
-    : data_ptr_(data_ptr), size_(size) {}
-  virtual ~Column(){}
+  Column() {}
+  virtual ~Column() {}
+  virtual I32 get_size() = 0;
   virtual IFType get(I32 rowid) = 0;  // get the item in rowid row
 };
+
+template <typename IFType, class Impl>
+class ColumnImpl : public Column
+{
+private:
+  Impl impl_;
+public:
+  ColumnImpl(void* data_ptr, I32 data_size)
+    : Column(),
+      impl_(data_ptr, data_size)
+  {}
+  I32 get_size() {return impl_.data_size_;}
+  IFType get(I32 rowid) {return impl_.get(rowid);}
+}
 
 // abstract interface of sorted column for findings
 template <typename IFType>
@@ -28,6 +39,17 @@ class SortedColumn : public virtual Column<IFType, ACType> {
   virtual I32 find(IFType var);  // find the row of target value
 };
 
+template <typename IFType, class Impl>
+class SortedColumnImpl
+  : public SortedColumn<IFType>, public ColumnImpl<IFType, Impl>
+{
+public:
+  SortedColumnImpl(void* data_ptr, I32 data_size)
+    : SortedColumn(),
+      ColumnImpl(data_ptr, data_size)
+  {}
+  I32 find(IFType var){return impl_.find(var);}
+}
 
 template <typename IFType, typename ACType>
 class PlainColumn : public Column<IFType>{
