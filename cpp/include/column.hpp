@@ -2,6 +2,7 @@
 #define INCLUDED_COLDB_COLUMN_HPP
 
 #include <algorithm>
+#include <string>
 #include "types.hpp"
 
 namespace coldb{
@@ -231,6 +232,7 @@ struct EnumImpl
   I32 enum_cnt_;
   ET* new_val_ptr_;
   DT* enum_ptr_;
+  
   EnumImpl(void* data_ptr, I32 data_size) : data_size_(data_size)
   {
     enum_cnt_ = *((ET*)data_ptr);
@@ -254,10 +256,56 @@ struct EnumImpl
     
     return std::lower_bound(new_val_ptr_, new_val_ptr_ + data_size_, enum_i);
   }
-}
+};
 
+template <U32 bytes>
+struct StructImpl
+{
+  I32 data_size_;
+  void* data_ptr_;
+  
+  StructImpl(void* data_ptr, I32 data_size)
+    : data_size_(data_size), data_ptr_(data_ptr)
+  {}
+  
+  std::string get(I32 rowid)
+  {
+    return std::string(data_ptr_ + (rowid * bytes), bytes);
+  }
+};
 
-
+template <typename PT, U32 align>
+struct BlobImpl
+{
+  I32 data_size_;
+  I32 blob_size_;  // aligned blob size
+  PT* offset_ptr_;  // aligned offset
+  char* blob_ptr_;  // raw data
+  
+  BlobImpl(void* data_ptr, I32 data_size)
+    : data_size_(data_size)
+  {
+    blob_size = *((PT*)data_ptr);
+    offset_ptr_ = ((PT*)data_ptr) + 1;
+    blob_ptr_ = offset_ptr_ + data_size_;
+  }
+  
+  std::string get(I32 rowid)
+  {
+    I32 aligned_size;
+    I32 offset = offset_ptr_[rowid]
+    if(rowid == data_size - 1)
+    {
+      aligned_size = blob_size_ - offset;
+    }
+    else
+    {
+      aligned_size = offset_ptr_[rowid + 1] - offset
+    }
+    
+    return std::string(blob_ptr_ + (offset * align), aligned_size * align);
+  }
+};
 
 }
 #endif
