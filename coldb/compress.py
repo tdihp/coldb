@@ -48,7 +48,7 @@ def c_plain_blob(col_type, col):
     stepdict = {'blob1': 1, 'blob2': 2, 'blob4': 4}
     step = stepdict[col_type]
     start_list = []
-    cnt_list = []
+#    cnt_list = []
     mybuffer = StringIO()
     cur_pos = 0
     for val in col:
@@ -56,14 +56,16 @@ def c_plain_blob(col_type, col):
         assert not l % step
         sl = l // step
         start_list.append(cur_pos)
-        cnt_list.append(sl)
+#        cnt_list.append(sl)
         mybuffer.write(val)
         cur_pos += sl
     mybuffer_val = mybuffer.getvalue()
     mybuffer.close()
     mybuffer_len = cur_pos
     result = array_packing((POINTER_TYPE,
-                            [mybuffer_len] + start_list + cnt_list))
+                            [mybuffer_len] + start_list\
+                            #+ cnt_list
+                            ))
     return result + mybuffer_val
 
 
