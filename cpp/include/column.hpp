@@ -293,14 +293,14 @@ struct BlobImpl
   std::string get(I32 rowid)
   {
     I32 aligned_size;
-    I32 offset = offset_ptr_[rowid]
+    I32 offset = offset_ptr_[rowid];
     if(rowid == data_size - 1)
     {
       aligned_size = blob_size_ - offset;
     }
     else
     {
-      aligned_size = offset_ptr_[rowid + 1] - offset
+      aligned_size = offset_ptr_[rowid + 1] - offset;
     }
     
     return std::string(blob_ptr_ + (offset * align), aligned_size * align);
