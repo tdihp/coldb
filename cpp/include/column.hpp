@@ -5,12 +5,13 @@
 #include <string>
 #include "types.hpp"
 
-namespace coldb{
+namespace coldb
+{
 
 template <typename T>
 inline void* aligned(void* ptr)
 {
-  U32 align_mask = sizeof(T)-1;
+  U32 align_mask = sizeof(T) - 1;
   U32 u_ptr = (U32)ptr;
   U32 tail = u_ptr & align_mask;
   if(tail)
