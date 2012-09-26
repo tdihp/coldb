@@ -60,6 +60,9 @@ class Schema(object):
                     c_config['fkey'] = m.groupdict()['target']
                 if t_config.get('pkey', None) == c_uniname:
                     c_config['pkey'] = True
+                if 'skeys' in t_config:
+                    if c_uniname == t_config['skeys'][0]:
+                        c_config['skey'] = True
                 self._cols.append(Column(self, **c_config))
             self._tables.append(Table(self, **t_config))
 

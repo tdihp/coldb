@@ -8,6 +8,7 @@ from bisect import bisect_left
 
 from .common import COMPRESS_TYPES
 from .common import ALIGN_BYTES
+from .common import uniname2name
 from .compress import c_plain, c_run0, c_run1, c_enum
 from .compress import CompressFailed
 from .algorithm import minimum_type
@@ -26,12 +27,13 @@ class ColumnError(Exception):
 
 class Column(object):
     def __init__(self, schema, uniname, datatype, tablename,
-                 pkey=False, fkey=None, compress=None, **kw):
+                 pkey=False, skey=False, fkey=None, compress=None, **kw):
         self._schema = schema
         self._uniname = uniname
         self._datatype = datatype
         self._tablename = tablename
         self._pkey = pkey
+        self._skey = skey
         self._fkey = fkey
         self._compress = compress
         self.logger = logging.getLogger('coldb.column')
@@ -43,6 +45,10 @@ class Column(object):
     @property
     def uniname(self):
         return self._uniname
+        
+    @property
+    def name(self):
+        return uniname2name(self._uniname)
 
     @property
     def datatype(self):
@@ -55,6 +61,10 @@ class Column(object):
     @property
     def pkey(self):
         return self._pkey
+
+    @property
+    def skey(self):
+        return self._skey
 
     @property
     def fkey(self):
