@@ -2,8 +2,8 @@
 #define INCLUDED_COLDB_FACTORY_HPP
 
 #include <string>
-#include "types.hpp"
-#include "column.hpp"
+#include "coldb/types.hpp"
+#include "coldb/column.hpp"
 
 namespace coldb
 {

@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <string>
-#include "types.hpp"
+#include "coldb/types.hpp"
 
 namespace coldb
 {

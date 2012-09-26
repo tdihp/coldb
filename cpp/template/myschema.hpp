@@ -1,9 +1,9 @@
 #ifndef INCLUDED_MYSCHEMA_HPP
 #define INCLUDED_MYSCHEMA_HPP
 
-#include "types.hpp"
-#include "column.hpp"
-#include "factory.hpp"
+#include "coldb/types.hpp"
+#include "coldb/column.hpp"
+#include "coldb/factory.hpp"
 
 namespace myschema
 {
