@@ -8,6 +8,7 @@ typedef signed short I16;
 typedef unsigned short U16;
 typedef signed int I32;
 typedef unsigned int U32;
+typedef unsigned long UPT;
 
 // in-program data types
 typedef unsigned short COLPT;

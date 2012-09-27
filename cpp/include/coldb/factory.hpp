@@ -14,7 +14,7 @@ template <template<typename IFType> class IF,
           typename PT,
           typename ET,
           typename DT>
-IF<IFType>* _i_col_factory_l1(E_COMPRESS compress_id,
+IF<IFType>* _i_col_factory_l1(U32 compress_id,
                               void* data_ptr,
                               I32 data_size)
 {
@@ -39,7 +39,7 @@ template <template<typename IFType> class IF,
           typename PT,
           typename ET>
 IF<IFType>* _i_col_factory(char data_type,
-                                E_COMPRESS compress_id,
+                                U32 compress_id,
                                 void* data_ptr,
                                 I32 data_size)
 {
@@ -71,7 +71,7 @@ IF<IFType>* _i_col_factory(char data_type,
 // normal col factory
 template <typename IFType, typename PT, typename ET>
 Column<IFType>* i_col_factory(char data_type,
-                              E_COMPRESS compress_id,
+                              U32 compress_id,
                               void* data_ptr,
                               I32 data_size)
 {
@@ -81,8 +81,8 @@ Column<IFType>* i_col_factory(char data_type,
 
 // sorted col factory
 template <typename IFType, typename PT, typename ET>
-Column<IFType>* i_scol_factory(char data_type,
-                               E_COMPRESS compress_id,
+SortedColumn<IFType>* i_scol_factory(char data_type,
+                               U32 compress_id,
                                void* data_ptr,
                                I32 data_size)
 {
@@ -97,7 +97,7 @@ template <template<typename IFType> class IF,
           typename PT,
           typename ET,
           typename DT>
-IF<IFType>* _i_fcol_factory_l1(E_COMPRESS compress_id,
+IF<IFType>* _i_fcol_factory_l1(U32 compress_id,
                                void* data_ptr,
                                I32 data_size,
                                TgtIF<IFType>* tgt)
@@ -124,7 +124,7 @@ template <template<typename IFType> class IF,
           typename PT,
           typename ET>
 IF<IFType>* _i_fcol_factory(char data_type,
-                            E_COMPRESS compress_id,
+                            U32 compress_id,
                             void* data_ptr,
                             I32 data_size,
                             TgtIF<IFType>* tgt)
@@ -157,7 +157,7 @@ IF<IFType>* _i_fcol_factory(char data_type,
 // normal fcol factory
 template <typename IFType, typename PT, typename ET>
 FKeyColumn<IFType>* i_fcol_factory(char data_type,
-                                   E_COMPRESS compress_id,
+                                   U32 compress_id,
                                    void* data_ptr,
                                    I32 data_size,
                                    SortedColumn<IFType>* tgt)
@@ -170,7 +170,7 @@ FKeyColumn<IFType>* i_fcol_factory(char data_type,
 // sorted fcol factory
 template <typename IFType, typename PT, typename ET>
 SortedFKeyColumn<IFType>* i_sfcol_factory(char data_type,
-                                          E_COMPRESS compress_id,
+                                          U32 compress_id,
                                           void* data_ptr,
                                           I32 data_size,
                                           SortedColumn<IFType>* tgt)
@@ -183,7 +183,7 @@ SortedFKeyColumn<IFType>* i_sfcol_factory(char data_type,
 // struct col factory
 template <U32 bytes>
 Column<std::string>* s_col_factory(char data_type,
-                                   E_COMPRESS compress_id,
+                                   U32 compress_id,
                                    void* data_ptr,
                                    I32 data_size)
 {
@@ -194,7 +194,7 @@ Column<std::string>* s_col_factory(char data_type,
 // blob col factory
 template <typename PT, U32 align>
 Column<std::string>* b_col_factory(char data_type,
-                                   E_COMPRESS compress_id,
+                                   U32 compress_id,
                                    void* data_ptr,
                                    I32 data_size)
 {

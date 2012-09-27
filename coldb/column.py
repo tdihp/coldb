@@ -45,7 +45,7 @@ class Column(object):
     @property
     def uniname(self):
         return self._uniname
-        
+
     @property
     def name(self):
         return uniname2name(self._uniname)
