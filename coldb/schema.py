@@ -5,6 +5,7 @@ Created on Sep 1, 2012
 '''
 import re
 from struct import Struct
+import logging
 from .common import S_TABLE_HEADER_STRUCT, S_COL_HEADER_STRUCT, S_PACKAGE_HEADER_STRUCT
 from .common import col_uniname, FKEY_RE, POINTER_TYPE, ALIGN_BYTES
 from .table import Table
@@ -22,6 +23,7 @@ class Schema(object):
         self._cols = []
         self._read_config(config)
         self.validate()
+        self.logger = logging.getLogger('coldb.schema')
 
     def __repr__(self):
         return "Schema(%s)" % (', '.join(self.table_by_name.keys()))
@@ -104,6 +106,7 @@ class Schema(object):
                     assert pitched_col_size == float(col_size) / float(ALIGN_BYTES)
                     col_header_list.append(col_header_struct.pack(store_type, compression_id, pitched_col_size))
                     col_data_list.append(data)
+                    self.logger.info("%s, %s, %s, %s" ,col_uniname, store_type, compression_id, col_size)
         package_header = package_header_struct.pack(0, 0)
         table_header_struct = ''.join(table_header_list)
         col_header_struct = ''.join(col_header_list)

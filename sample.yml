@@ -3,12 +3,12 @@ tables:
     pkey: person_id
     cols:
       - name: person_id
-        datatype: L
+        datatype: I
         compress: [run1]
       - name: tel
         datatype: 11s
       - name: email
-        datatype: blob
+        datatype: blob1
 
   - name: groups
     pkey: group_id
@@ -16,7 +16,7 @@ tables:
       - name: group_id
         datatype: H
       - name: group_name
-        datatype: blob
+        datatype: blob1
 
   - name: group2person
     skeys:
@@ -33,9 +33,9 @@ tables:
         datatype: B
         compress: [run0, run1]
       - name: register_date
-        datatype: L
+        datatype: I
         compress: [run0, run1, enum]
       - name: end_date
-        datatype: L
+        datatype: I
         compress: [run0, run1, enum]
 

@@ -57,12 +57,13 @@ def array_packing(arrdef, *more_arrdef):
             mybuffer.write(ALIGN_CHAR * fill_bytes)
             cur_bytes += fill_bytes
 
-            # write this arr
-            cur_size = last_bytes * len(arr)
-            mybuffer.write(''.join(mystruct.pack(val) for val in arr))
+        # write this arr
+        cur_size = last_bytes * len(arr)
+        mybuffer.write(''.join(mystruct.pack(val) for val in arr))
 
-            # leave notes
-            last_bytes = cur_bytes
+        # leave notes
+        last_bytes = cur_bytes
+
     rtn = mybuffer.getvalue()
     mybuffer.close()
     return rtn

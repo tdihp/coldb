@@ -50,9 +50,9 @@ public:
     : Column<IFType>(),
       impl_(data_ptr, data_size)
   {}
-  
+
   I32 get_size() {return impl_.data_size_;}
-  
+
   IFType get(I32 rowid) {return impl_.get(rowid);}
 };
 
@@ -73,7 +73,7 @@ public:
   SortedColumnImpl(void* data_ptr, I32 data_size)
     :Base(data_ptr, data_size)
   {}
-  
+
   I32 find(IFType var){return Base::impl_.find(var);}
 };
 
@@ -120,9 +120,9 @@ public:
     : SortedFKeyColumn<IFType>(),
       Base(data_ptr, data_size, tgt)
   {}
-  
+
   I32 find_dest_row(I32 tgt_row) {return Base::impl_.find(tgt_row);}
-  
+
   I32 find(IFType var) {return Base::impl_.find(Base::tgt_->find(var));}
 };
 
@@ -131,7 +131,7 @@ struct PlainImpl
 {
   DT* data_ptr_;
   I32 data_size_;
-  
+
   PlainImpl(void* data_ptr, I32 data_size)
     : data_ptr_((DT*)data_ptr), data_size_(data_size)
   {}
@@ -157,19 +157,19 @@ struct Run0Impl
   I32 run_cnt_;
   PT* run_ptr_;
   DT* data_ptr_;
-  
+
   Run0Impl(void* data_ptr, I32 data_size) : data_size_(data_size)
   {
     run_cnt_ = *((PT*)data_ptr);
     run_ptr_ = ((PT*)data_ptr) + 1;
     data_ptr_ = (DT*)aligned<DT>((void*)(run_ptr_ + run_cnt_));
   }
-  
+
   DT get(I32 rowid)
   {
     // find rowid in run_ptr
     PT* runid = std::lower_bound(run_ptr_, run_ptr_ + run_cnt_, rowid);
-    
+
     if(*runid != rowid)
     {
       --runid;
@@ -177,7 +177,7 @@ struct Run0Impl
     // rtn data from data_ptr
     return data_ptr_[runid - run_ptr_];
   }
-  
+
   I32 find(DT var)
   {
     DT* runid = std::lower_bound(data_ptr_, data_ptr_ + run_cnt_, var);
@@ -203,14 +203,14 @@ public:
     PT* runid = std::lower_bound(Base::run_ptr_,
                                  Base::run_ptr_ + Base::run_cnt_,
                                  rowid);
-    
+
     if(*runid != rowid)
     {
       --runid;
     }
     return Base::data_ptr_[runid - Base::run_ptr_] + (rowid - *runid);
   }
-  
+
   I32 find(DT var)
   {
     I32 runid = std::lower_bound(Base::data_ptr_,
@@ -227,7 +227,7 @@ public:
     {
       runlen = *(this_run + 1) - *this_run;
     }
-    
+
     if(diff < runlen)
     {
       return *this_run + diff;
@@ -243,19 +243,19 @@ struct EnumImpl
   I32 enum_cnt_;
   ET* new_val_ptr_;
   DT* enum_ptr_;
-  
+
   EnumImpl(void* data_ptr, I32 data_size) : data_size_(data_size)
   {
     enum_cnt_ = *((ET*)data_ptr);
     new_val_ptr_ = ((ET*)data_ptr) + 1;
     enum_ptr_ = (DT*)aligned<DT>((void*)(new_val_ptr_ + data_size_));
   }
-  
+
   DT get(I32 rowid)
   {
     return enum_ptr_[new_val_ptr_[rowid]];
   }
-  
+
   // find is oddly used, whatever
   I32 find(DT var)
   {
@@ -264,7 +264,7 @@ struct EnumImpl
     {
       return -1;
     }
-    
+
     return std::lower_bound(new_val_ptr_, new_val_ptr_ + data_size_,
       enum_i - enum_ptr_) - new_val_ptr_;
   }
@@ -275,11 +275,11 @@ struct StructImpl
 {
   I32 data_size_;
   char* data_ptr_;
-  
+
   StructImpl(void* data_ptr, I32 data_size)
     : data_size_(data_size), data_ptr_((char*)data_ptr)
   {}
-  
+
   std::string get(I32 rowid)
   {
     return std::string(data_ptr_ + (rowid * bytes), bytes);
@@ -293,7 +293,7 @@ struct BlobImpl
   I32 blob_size_;  // aligned blob size
   PT* offset_ptr_;  // aligned offset
   char* blob_ptr_;  // raw data
-  
+
   BlobImpl(void* data_ptr, I32 data_size)
     : data_size_(data_size)
   {
@@ -301,7 +301,7 @@ struct BlobImpl
     offset_ptr_ = ((PT*)data_ptr) + 1;
     blob_ptr_ = (char*)(offset_ptr_ + data_size_);
   }
-  
+
   std::string get(I32 rowid)
   {
     I32 aligned_size;
@@ -314,7 +314,7 @@ struct BlobImpl
     {
       aligned_size = offset_ptr_[rowid + 1] - offset;
     }
-    
+
     return std::string(blob_ptr_ + (offset * align), aligned_size * align);
   }
 };
