@@ -11,18 +11,37 @@ using namespace std;
 ifstream::pos_type size;
 char * memblock;
 
-string bin2hex(string instr)
+string write_escaped(string const& s)
 {
-  ostringstream oss (ostringstream::out);
-  for(int i = 0; i < instr.size(); ++i)
-  {
-    oss << setw(2) << setfill('0') << hex << (unsigned int)(instr.data()[i]);
+  ostringstream out(ostringstream::out);
+  out << '"';
+  for (string::const_iterator i = s.begin(), end = s.end(); i != end; ++i) {
+    unsigned char c = *i;
+    if (' ' <= c and c <= '~' and c != '\\' and c != '"') {
+      out << c;
+    }
+    else {
+      out << '\\';
+      switch(c) {
+      case '"':  out << '"';  break;
+      case '\\': out << '\\'; break;
+      case '\t': out << 't';  break;
+      case '\r': out << 'r';  break;
+      case '\n': out << 'n';  break;
+      default:
+        char const* const hexdig = "0123456789ABCDEF";
+        out << 'x';
+        out << hexdig[c >> 4];
+        out << hexdig[c & 0xF];
+      }
+    }
   }
-  return oss.str();
+  out << '"';
+  return out.str();
 }
 
 int main() {
-  ifstream file ("example.dat", ios::in|ios::binary|ios::ate);
+  ifstream file ("sampledata.dat", ios::in|ios::binary|ios::ate);
   if (file.is_open())
   {
     size = file.tellg();
@@ -46,7 +65,7 @@ int main() {
       << schema.{{table.name}}_.{{col.name}}->get(i) << ", "
       {%     endif -%}
       {%   else -%}
-      << bin2hex(schema.{{table.name}}_.{{col.name}}->get(i)) << ", "
+      << write_escaped(schema.{{table.name}}_.{{col.name}}->get(i)) << ", "
       {%   endif -%}
       {% endfor -%}
       << endl;
