@@ -218,6 +218,16 @@ public:
     PT* this_run = Base::run_ptr_ + runid;
     I32 runlen;
     I32 diff = var - Base::data_ptr_[runid];
+
+    //situation of 12333345 find(3), tricky part of this compress
+    if((runid > 0) && (!diff))
+    {
+      DT last_var =  Base::data_ptr_[runid - 1];
+      if((*this_run - *(this_run - 1)) >= (var - last_var))
+      {
+        return (*this_run - 1);
+      }
+    }
     // get length of this run
     if(runid == (Base::run_cnt_ - 1))
     {

@@ -20,7 +20,7 @@ typedef enum E_COMPRESS
   PLAIN = 0,
   RUN0 = 1,
   RUN1 = 2,
-  ENUM = 3,
+  ENUM = 3
 } E_COMPRESS;
 
 }
