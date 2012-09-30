@@ -47,10 +47,8 @@ public:
       {%   endif -%}
       {% endfor %}
 
-      {{table.name}}() {}
-
-      {{table.name}}(Schema* cur_schema, I32 data_size, void*& col_def, void*& col_ptr)
-        : data_size_(data_size),
+      {{table.name}}()
+        : data_size_(0),
       {% for col_uniname in table.col_uninames -%}
         {% set col = schema.col_by_uniname[col_uniname] -%}
         {% if loop.last -%}
@@ -59,7 +57,11 @@ public:
         {{col.name}}(0),
         {% endif -%}
       {% endfor -%}
+      {}
+
+      void init(Schema* cur_schema, I32 data_size, void*& col_def, void*& col_ptr)
       {
+        data_size_ = data_size;
         if(!data_size_) {return;}
         char data_type;
         char compress_id;
@@ -103,6 +105,18 @@ public:
         col_ptr = (U32*)col_ptr + col_size;
         {% endfor %}
       }
+      
+      ~{{table.name}}()
+      {
+        {% for col_uniname in table.col_uninames -%}
+        {%   set col = schema.col_by_uniname[col_uniname] -%}
+        if({{col.name}})
+        {
+          delete {{col.name}};
+          {{col.name}} = 0;
+        }
+        {% endfor -%}
+      }
     } {{table.name}}_;
 
   {% endfor -%}
@@ -133,7 +147,7 @@ public:
     {% for table in tables -%}
     // {{table.name}}
     table_size = *(_tmp_table_sizes++);
-    {{table.name}}_ = {{table.name}}(this, table_size, col_def, col_ptr);
+    {{table.name}}_.init(this, table_size, col_def, col_ptr);
     {% endfor %}
   }
 
