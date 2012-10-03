@@ -33,10 +33,10 @@ using namespace coldb;
 %template(Run1_i) Run1Impl<I32, U16>;
 %template(Run1_I) Run1Impl<U32, U16>;
 
-%template(Enum_h) Run1Impl<I16, U8>;
-%template(Enum_H) Run1Impl<U16, U8>;
-%template(Enum_i) Run1Impl<I32, U8>;
-%template(Enum_I) Run1Impl<U32, U8>;
+%template(Enum_h) EnumImpl<I16, U8>;
+%template(Enum_H) EnumImpl<U16, U8>;
+%template(Enum_i) EnumImpl<I32, U8>;
+%template(Enum_I) EnumImpl<U32, U8>;
 
 %template(Struct_7) StructImpl<7>;
 %template(Struct_8) StructImpl<8>;
