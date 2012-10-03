@@ -1,5 +1,6 @@
 import unittest
 import random
+from array import array
 
 from coldb import compress
 from coldb import colimpl
@@ -18,8 +19,13 @@ def _get_sorted_data(length, drange):
     return sorted(result)
 
 
+def _get_bytes(n_bytes):
+    """random n_bytes generation"""
+    return array('B', (random.randint(0, 255) for i in range(n_bytes))).tostring()
+
+
 # algorithm mixins
-class _TestGetMixin():
+class _TestGetMixin(object):
     """ requires these attributes:
 
     - datarange: range of auto generated data
@@ -37,7 +43,7 @@ class _TestGetMixin():
                 self.assertEqual(l[i], col.get(i))
 
 
-class _TestFindMixin():
+class _TestFindMixin(object):
     """ requires these attributes:
 
     - datarange: range of auto generated data
@@ -50,7 +56,7 @@ class _TestFindMixin():
         for length in self.lengthlist:
             l = _get_sorted_data(length, self.datarange)
             l_data = self.compress_algo(self.col_type, l)
-            col = self.colimpl(l_data, len(l))
+            col = self.colimpl(l_data, length)
             # test find first
             cur_data = l[0]
             self.assertEqual(0, col.find(cur_data))
@@ -228,7 +234,7 @@ class TestRun1_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
 class TestEnum_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
     def setUp(self):
         self.datarange = (-32768, 32768)
-        self.lengthlist = [1, 10, 100]
+        self.lengthlist = [1, 10, 100]  # enum can't go up to 255
         self.compress_algo = compress.c_enum
         self.col_type = 'h'
         self.colimpl = colimpl.Enum_h
@@ -259,3 +265,72 @@ class TestEnum_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_enum
         self.col_type = 'I'
         self.colimpl = colimpl.Enum_I
+
+
+class _TestStruct(object):
+    """requires lengthlist, structlength, col_type, colimpl"""
+    def testGet(self):
+        for length in self.lengthlist:
+            l = list(_get_bytes(self.structlength) for i in range(length))
+            l_data = compress.c_plain_struct(self.col_type, l)
+            col = self.colimpl(l_data, length)
+            for i, val in enumerate(l):
+                self.assertEqual(val, col.get(i))
+
+
+class TestStruct_7(unittest.TestCase, _TestStruct):
+    """struct7 is a test case to test the struct column"""
+    def setUp(self):
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.structlength = 7
+        self.col_type = '7s'
+        self.colimpl = colimpl.Struct_7
+
+
+class TestStruct_8(unittest.TestCase, _TestStruct):
+    """struct7 is a test case to test the struct column"""
+    def setUp(self):
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.structlength = 8
+        self.col_type = '8s'
+        self.colimpl = colimpl.Struct_8
+
+
+class _TestBlob(object):
+    """requires lengthlist, align, col_type, colimpl, slenrange
+    """
+    def testGet(self):
+        for length in self.lengthlist:
+            slens = (random.randint(*self.slenrange) for i in range(length))
+            l = list(_get_bytes(self.align * slen) for slen in slens)
+            l_data = compress.c_plain_blob(self.col_type, l)
+            col = self.colimpl(l_data, length)
+            for i, val in enumerate(l):
+                self.assertEqual(val, col.get(i))
+
+
+class TestBlob_1(unittest.TestCase, _TestBlob):
+    def setUp(self):
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.align = 1
+        self.col_type = 'blob1'
+        self.colimpl = colimpl.Blob_1
+        self.slenrange = (0, 10)
+
+
+class TestBlob_2(unittest.TestCase, _TestBlob):
+    def setUp(self):
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.align = 2
+        self.col_type = 'blob2'
+        self.colimpl = colimpl.Blob_2
+        self.slenrange = (0, 10)
+
+
+class TestBlob_4(unittest.TestCase, _TestBlob):
+    def setUp(self):
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.align = 4
+        self.col_type = 'blob4'
+        self.colimpl = colimpl.Blob_4
+        self.slenrange = (0, 10)
