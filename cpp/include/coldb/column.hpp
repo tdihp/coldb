@@ -135,13 +135,14 @@ struct PlainImpl
   PlainImpl(void* data_ptr, I32 data_size)
     : data_ptr_((DT*)data_ptr), data_size_(data_size)
   {}
-
+  // TODO: add no such row situation
   DT get(I32 rowid) {return data_ptr_[rowid];}
 
   I32 find(DT var)
   {
-    DT* i = std::lower_bound(data_ptr_, data_ptr_ + data_size_, var);
-    if(*i == var)
+    DT* end = data_ptr_ + data_size_;
+    DT* i = std::lower_bound(data_ptr_, end, var);
+    if((end != i) && (*i == var))
     {
       return i - data_ptr_;
     }
@@ -167,6 +168,7 @@ struct Run0Impl
 
   DT get(I32 rowid)
   {
+    // TODO: add no such row situation
     // find rowid in run_ptr
     PT* runid = std::lower_bound(run_ptr_, run_ptr_ + run_cnt_, rowid);
 
@@ -180,10 +182,11 @@ struct Run0Impl
 
   I32 find(DT var)
   {
-    DT* runid = std::lower_bound(data_ptr_, data_ptr_ + run_cnt_, var);
-    if(*runid == var)
+    DT* end = data_ptr_ + run_cnt_;
+    DT* dptr = std::lower_bound(data_ptr_, end, var);
+    if((dptr != end) && (*dptr == var))
     {
-      return run_ptr_[runid - data_ptr_];
+      return run_ptr_[dptr - data_ptr_];
     }
     return -1;
   }
@@ -199,6 +202,7 @@ public:
   {}
   DT get(I32 rowid)
   {
+    // TODO: add no such row situation
     // find rowid in run_ptr
     PT* runid = std::lower_bound(Base::run_ptr_,
                                  Base::run_ptr_ + Base::run_cnt_,
@@ -213,23 +217,37 @@ public:
 
   I32 find(DT var)
   {
-    I32 runid = std::lower_bound(Base::data_ptr_,
-      Base::data_ptr_ + Base::run_cnt_, var) - Base::data_ptr_;
-    PT* this_run = Base::run_ptr_ + runid;
+    DT* end = Base::data_ptr_ + Base::run_cnt_;
+    DT* dptr = std::lower_bound(Base::data_ptr_, end, var);
+
+    if((dptr == end) || (*dptr != var))
+    {
+      if(dptr == Base::data_ptr_)
+      {
+        return -1;
+      }
+      else
+      {
+        --dptr;
+      }
+    }
+
+    I32 diff = var - *dptr;
+    I32 i = dptr - Base::data_ptr_;
+    PT* this_run = Base::run_ptr_ + i;
     I32 runlen;
-    I32 diff = var - Base::data_ptr_[runid];
 
     //situation of 12333345 find(3), tricky part of this compress
-    if((runid > 0) && (!diff))
+    if((i > 0) && (!diff))
     {
-      DT last_var =  Base::data_ptr_[runid - 1];
-      if((*this_run - *(this_run - 1)) >= (var - last_var))
+      if((*this_run - *(this_run - 1)) >= (var - *(dptr - 1)))
       {
         return (*this_run - 1);
       }
     }
+
     // get length of this run
-    if(runid == (Base::run_cnt_ - 1))
+    if(i == (Base::run_cnt_ - 1))
     {
       runlen = Base::data_size_ - *this_run;
     }
