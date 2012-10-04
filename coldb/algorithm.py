@@ -26,6 +26,45 @@ def enum(col):
     return enumlist, newvallist
 
 
+def frame(fsize, col):
+    """fsize: a size of the frame. fmax-fmin < fsize"""
+    framelist = []
+    rowlist = []
+    newvallist = []
+    cur_min = col[0]
+    cur_max = col[0]
+    cur_startrow = 0
+    for cur_row, val in enumerate(col[1:], 1):
+        if(cur_min <= val <= cur_max):
+            continue
+        new_min = cur_min
+        new_max = cur_max
+        if val < new_min:
+            new_min = val
+        if val > new_max:
+            new_max = val
+        if new_max - new_min >= fsize:
+            # emit a frame
+            framelist.append(cur_min)
+            rowlist.append(cur_startrow)
+            # start a new frame
+            cur_startrow = cur_row
+            cur_min = val
+            cur_max = val
+        else:
+            cur_min = new_min
+            cur_max = new_max
+    # emit the final frame
+    framelist.append(cur_min)
+    rowlist.append(cur_startrow)
+    # now, the val list
+    for i, (frame, row) in enumerate(zip(framelist, rowlist)[:-1]):
+        newvallist.extend(list((val - frame) for val in col[row:rowlist[i + 1]]))
+
+    newvallist.extend(list(val - framelist[-1] for val in col[rowlist[-1]:]))
+    return rowlist, framelist, newvallist
+
+
 def align2pitch(inputlen, pitch):
     tail = inputlen % pitch
     if tail:
@@ -95,6 +134,7 @@ def minimum_type(default_type, col_data):
     test_ts = conv_table[dt]
     return _compare_type(dmin, dmax, test_ts, dt)
 
+
 def make_aligned_blocks(pitch, *blocks):
     mybuffer = StringIO()
     cur_size = 0
@@ -108,5 +148,3 @@ def make_aligned_blocks(pitch, *blocks):
     result = mybuffer.getvalue()
     mybuffer.close()
     return result
-
-

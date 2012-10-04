@@ -18,6 +18,7 @@ class CompressFailed(Exception):
 class CompressError(Exception):
     pass
 
+
 def c_plain(col_type, col):
     """ the default non-compression approach """
     if col_type in ('b', 'B', 'h', 'H', 'i', 'I'):

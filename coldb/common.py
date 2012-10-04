@@ -60,20 +60,25 @@ FKEY_RE = r'fkey\((?P<target>\w+)\)'
 def col_uniname(tablename, colname):
     return tablename + '__' + colname
 
+
 def uniname2name(uniname):
     return uniname.split('__')[-1]
+
 
 def is_struct_datatype(datatype):
     return re.match(r'^(?P<size>\d+)s$', datatype)
 
+
 def is_blob_datatype(datatype):
     return re.match(r'^blob(?P<align>\d+)$', datatype)
+
 
 def datatype2struct(datatype):
     m = is_struct_datatype(datatype)
     size = int(m.groupdict()['size'])
     assert size > 0
     return size
+
 
 def datatype2blob(datatype):
     m = is_blob_datatype(datatype)
