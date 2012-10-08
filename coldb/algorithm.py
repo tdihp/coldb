@@ -108,11 +108,12 @@ def array_packing(arrdef, *more_arrdef):
     return rtn
 
 
-def _compare_type(dmin, dmax, comptypes, default):
+def _compare_type(dmin, dmax, comptypes, default=None):
     for t in comptypes:
         tmin, tmax = IRANGE_DICT[t]
         if tmin <= dmin and dmax <= tmax:
             return t
+    assert not default is None, 'No type fits!'
     return default
 
 
@@ -133,6 +134,23 @@ def minimum_type(default_type, col_data):
         return dt
     test_ts = conv_table[dt]
     return _compare_type(dmin, dmax, test_ts, dt)
+
+
+def ptr_type(col_data):
+    """ figure out which datatype do be used as ptr """
+    l = len(col_data)
+    ptr_conv_order = 'BHI'
+    return _compare_type(0, l, ptr_conv_order)
+
+
+def bptr_type(blob_col_data, align):
+    _sum = 0
+    for d in blob_col_data:
+        _div, _mod = divmod(len(d), align)
+        assert not _mod
+        _sum += _div
+    ptr_conv_order = 'HI'
+    return _compare_type(0, _sum, ptr_conv_order)
 
 
 def make_aligned_blocks(pitch, *blocks):

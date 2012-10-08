@@ -45,6 +45,11 @@ COMPRESS_TYPES = [
     'enum',
 ]
 
+BLOB_CTYPE2BPTR = {
+    'H': 's',
+    'I': 'S',
+}
+
 DATATYPE2CTYPE = {
     'b': 'I8',
     'B': 'U8',

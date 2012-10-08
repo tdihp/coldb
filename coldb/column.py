@@ -8,11 +8,13 @@ from bisect import bisect_left
 
 from .common import COMPRESS_TYPES
 from .common import ALIGN_BYTES
-from .common import uniname2name
+from .common import uniname2name, is_blob_datatype, datatype2blob
+from .common import BLOB_CTYPE2BPTR
 from .compress import c_plain, c_run0, c_run1, c_enum
 from .compress import CompressFailed
 from .algorithm import minimum_type
 from .algorithm import pitched_len
+from .algorithm import ptr_type, bptr_type
 
 COMPRESS_OPS = {
     'run0': c_run0,
@@ -109,21 +111,30 @@ class Column(object):
         arr = self.arr
         del self.arr
         min_type = minimum_type(self.datatype, arr)
-        cf, data = self.try_compress(min_type, arr)
+        opts = {}
+        #  get ptr type
+        opts['pt'] = ptr_type(arr)
+        #  get blob ptr type
+        if is_blob_datatype(self.datatype):
+            align = datatype2blob(self.datatype)
+            opts['bpt'] = bptr_type(align)
+        cf, data = self.try_compress(min_type, arr, **opts)
         store_type = min_type
         if store_type not in ('b', 'B', 'h', 'H', 'i', 'I'):
-            store_type = '-'
+            if 'bpt' in opts:
+                store_type = BLOB_CTYPE2BPTR[opts['bpt']]
+            else:
+                store_type = '-'
         compression_id = COMPRESS_TYPES.index(cf)
         return store_type, compression_id, data
 
 
-
-    def try_compress(self, val_type, arr):
+    def try_compress(self, val_type, arr, **opts):
         plain_data = c_plain(val_type, arr)
         comp_dict = dict()
         for cf in self.compress:
             try:
-                comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr)
+                comp_dict[cf] = COMPRESS_OPS[cf](val_type, arr, **opts)
             except CompressFailed as e:
                 self.logger.info(e)
         comp_dict['plain'] = plain_data
