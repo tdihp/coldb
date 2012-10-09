@@ -8,24 +8,23 @@
 namespace coldb
 {
 
-template <typename T>
+template <unsigned int bytes>
 inline void* aligned(void* ptr)
 {
-  U32 align_mask = sizeof(T) - 1;
+  // TODO: assert 2, 4
+  U32 align_mask = bytes - 1;
   UPT u_ptr = (UPT)ptr;
   UPT tail = u_ptr & align_mask;
   if(tail)
   {
-    return (void*) (u_ptr + sizeof(T) - tail);
+    return (void*) (u_ptr + bytes - tail);
   }
   return ptr;
 }
 
 template <>
-inline void* aligned<U8>(void* ptr) {return ptr;}
+inline void* aligned<1>(void* ptr) {return ptr;}
 
-template <>
-inline void* aligned<I8>(void* ptr) {return ptr;}
 
 // abstract interface of all column objects
 // IFType: type of interface
@@ -46,7 +45,7 @@ class ColumnImpl : virtual public Column<IFType>
 protected:
   Impl impl_;
 public:
-  ColumnImpl(void* data_ptr, I32 data_size)
+  ColumnImpl(void*& data_ptr, I32 data_size)
     : Column<IFType>(),
       impl_(data_ptr, data_size)
   {}
@@ -70,7 +69,7 @@ class SortedColumnImpl
 private:
   typedef ColumnImpl<IFType, Impl> Base;
 public:
-  SortedColumnImpl(void* data_ptr, I32 data_size)
+  SortedColumnImpl(void*& data_ptr, I32 data_size)
     :Base(data_ptr, data_size)
   {}
 
@@ -92,7 +91,7 @@ protected:
   Impl impl_;
   SortedColumn<IFType>* tgt_;
 public:
-  FKeyColumnImpl(void* data_ptr, I32 data_size, SortedColumn<IFType>* tgt)
+  FKeyColumnImpl(void*& data_ptr, I32 data_size, SortedColumn<IFType>* tgt)
     : impl_(data_ptr, data_size), tgt_(tgt)
   {}
   I32 get_size() {return impl_.data_size_;}
@@ -116,7 +115,7 @@ class SortedFKeyColumnImpl
 private:
   typedef FKeyColumnImpl<IFType, Impl> Base;
 public:
-  SortedFKeyColumnImpl(void* data_ptr, I32 data_size, SortedColumn<IFType>* tgt)
+  SortedFKeyColumnImpl(void*& data_ptr, I32 data_size, SortedColumn<IFType>* tgt)
     : SortedFKeyColumn<IFType>(),
       Base(data_ptr, data_size, tgt)
   {}
@@ -132,9 +131,11 @@ struct PlainImpl
   DT* data_ptr_;
   I32 data_size_;
 
-  PlainImpl(void* data_ptr, I32 data_size)
+  PlainImpl(void*& data_ptr, I32 data_size)
     : data_ptr_((DT*)data_ptr), data_size_(data_size)
-  {}
+  {
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + data_size_));
+  }
   // TODO: add no such row situation
   DT get(I32 rowid) {return data_ptr_[rowid];}
 
@@ -159,11 +160,12 @@ struct Run0Impl
   PT* run_ptr_;
   DT* data_ptr_;
 
-  Run0Impl(void* data_ptr, I32 data_size) : data_size_(data_size)
+  Run0Impl(void*& data_ptr, I32 data_size) : data_size_(data_size)
   {
     run_cnt_ = *((PT*)data_ptr);
     run_ptr_ = ((PT*)data_ptr) + 1;
-    data_ptr_ = (DT*)aligned<DT>((void*)(run_ptr_ + run_cnt_));
+    data_ptr_ = (DT*)aligned<sizeof(DT)>((void*)(run_ptr_ + run_cnt_));
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + run_cnt_));
   }
 
   DT get(I32 rowid)
@@ -198,7 +200,7 @@ struct Run1Impl : public Run0Impl<DT, PT>
 private:
   typedef Run0Impl<DT, PT> Base;
 public:
-  Run1Impl(void* data_ptr, I32 data_size): Run0Impl<DT, PT>(data_ptr, data_size)
+  Run1Impl(void*& data_ptr, I32 data_size): Run0Impl<DT, PT>(data_ptr, data_size)
   {}
   DT get(I32 rowid)
   {
@@ -272,11 +274,12 @@ struct EnumImpl
   ET* new_val_ptr_;
   DT* enum_ptr_;
 
-  EnumImpl(void* data_ptr, I32 data_size) : data_size_(data_size)
+  EnumImpl(void*& data_ptr, I32 data_size) : data_size_(data_size)
   {
     enum_cnt_ = *((ET*)data_ptr);
     new_val_ptr_ = ((ET*)data_ptr) + 1;
-    enum_ptr_ = (DT*)aligned<DT>((void*)(new_val_ptr_ + data_size_));
+    enum_ptr_ = (DT*)aligned<sizeof(DT)>((void*)(new_val_ptr_ + data_size_));
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(enum_ptr_ + data_size_));
   }
 
   DT get(I32 rowid)
@@ -304,9 +307,11 @@ struct StructImpl
   I32 data_size_;
   char* data_ptr_;
 
-  StructImpl(void* data_ptr, I32 data_size)
+  StructImpl(void*& data_ptr, I32 data_size)
     : data_size_(data_size), data_ptr_((char*)data_ptr)
-  {}
+  {
+    data_ptr = aligned<ALIGN_T>((void*)(data_ptr_ + (data_size_ * bytes)));
+  }
 
   std::string get(I32 rowid)
   {
@@ -314,26 +319,27 @@ struct StructImpl
   }
 };
 
-template <typename PT, U32 align>
+template <typename BPT, U32 align>
 struct BlobImpl
 {
   I32 data_size_;
-  I32 blob_size_;  // aligned blob size
-  PT* offset_ptr_;  // aligned offset
+  U32 blob_size_;  // aligned blob size
+  BPT* offset_ptr_;  // aligned offset
   char* blob_ptr_;  // raw data
 
-  BlobImpl(void* data_ptr, I32 data_size)
+  BlobImpl(void*& data_ptr, I32 data_size)
     : data_size_(data_size)
   {
-    blob_size_ = *((PT*)data_ptr);
-    offset_ptr_ = ((PT*)data_ptr) + 1;
+    blob_size_ = *((BPT*)data_ptr);
+    offset_ptr_ = ((BPT*)data_ptr) + 1;
     blob_ptr_ = (char*)(offset_ptr_ + data_size_);
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(blob_ptr_ + (blob_size_ * align)));
   }
 
   std::string get(I32 rowid)
   {
-    I32 aligned_size;
-    I32 offset = offset_ptr_[rowid];
+    U32 aligned_size;
+    U32 offset = offset_ptr_[rowid];
     if(rowid == data_size_ - 1)
     {
       aligned_size = blob_size_ - offset;

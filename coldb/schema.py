@@ -102,11 +102,9 @@ class Schema(object):
                     col = coldict[col_uniname]
                     store_type, compression_id, data = col.get_data()
                     col_size = pitched_len(len(data), ALIGN_BYTES)
-                    pitched_col_size = col_size // ALIGN_BYTES
-                    assert pitched_col_size == float(col_size) / float(ALIGN_BYTES)
-                    col_header_list.append(col_header_struct.pack(store_type, compression_id, pitched_col_size))
+                    col_header_list.append(col_header_struct.pack(store_type, compression_id))
                     col_data_list.append(data)
-                    self.logger.info("%s, %s, %s, %s" ,col_uniname, store_type, compression_id, col_size)
+                    self.logger.info("%s, %s, %s, %s", col_uniname, store_type, compression_id, col_size)
         package_header = package_header_struct.pack(0, 0)
         table_header_struct = ''.join(table_header_list)
         col_header_struct = ''.join(col_header_list)

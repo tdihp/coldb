@@ -128,7 +128,6 @@ class Column(object):
         compression_id = COMPRESS_TYPES.index(cf)
         return store_type, compression_id, data
 
-
     def try_compress(self, val_type, arr, **opts):
         plain_data = c_plain(val_type, arr)
         comp_dict = dict()

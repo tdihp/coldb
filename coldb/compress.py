@@ -8,7 +8,7 @@ import struct
 from cStringIO import StringIO
 
 from .algorithm import run, enum, array_packing
-from .common import POINTER_TYPE, ENUM_TYPE, IRANGE_DICT
+from .common import ENUM_TYPE, IRANGE_DICT
 
 
 class CompressFailed(Exception):

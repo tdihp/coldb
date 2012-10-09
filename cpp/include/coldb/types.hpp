@@ -10,6 +10,8 @@ typedef signed int I32;
 typedef unsigned int U32;
 typedef unsigned long UPT;
 
+typedef U32 ALIGN_T;
+
 // in-program data types
 typedef unsigned short COLPT;
 typedef unsigned int PKGPT;

@@ -15,7 +15,7 @@ template <template<typename IFType> class IF,
           typename ET,
           typename DT>
 IF<IFType>* _i_col_factory_l1(U32 compress_id,
-                              void* data_ptr,
+                              void*& data_ptr,
                               I32 data_size)
 {
   switch (compress_id)
@@ -40,7 +40,7 @@ template <template<typename IFType> class IF,
           typename ET>
 IF<IFType>* _i_col_factory(char data_type,
                                 U32 compress_id,
-                                void* data_ptr,
+                                void*& data_ptr,
                                 I32 data_size)
 {
   switch (data_type)
@@ -72,7 +72,7 @@ IF<IFType>* _i_col_factory(char data_type,
 template <typename IFType, typename PT, typename ET>
 Column<IFType>* i_col_factory(char data_type,
                               U32 compress_id,
-                              void* data_ptr,
+                              void*& data_ptr,
                               I32 data_size)
 {
   return _i_col_factory<Column, ColumnImpl, IFType, PT, ET>
@@ -83,7 +83,7 @@ Column<IFType>* i_col_factory(char data_type,
 template <typename IFType, typename PT, typename ET>
 SortedColumn<IFType>* i_scol_factory(char data_type,
                                U32 compress_id,
-                               void* data_ptr,
+                               void*& data_ptr,
                                I32 data_size)
 {
   return _i_col_factory<SortedColumn, SortedColumnImpl, IFType, PT, ET>
@@ -98,7 +98,7 @@ template <template<typename IFType> class IF,
           typename ET,
           typename DT>
 IF<IFType>* _i_fcol_factory_l1(U32 compress_id,
-                               void* data_ptr,
+                               void*& data_ptr,
                                I32 data_size,
                                TgtIF<IFType>* tgt)
 {
@@ -125,7 +125,7 @@ template <template<typename IFType> class IF,
           typename ET>
 IF<IFType>* _i_fcol_factory(char data_type,
                             U32 compress_id,
-                            void* data_ptr,
+                            void*& data_ptr,
                             I32 data_size,
                             TgtIF<IFType>* tgt)
 {
@@ -158,7 +158,7 @@ IF<IFType>* _i_fcol_factory(char data_type,
 template <typename IFType, typename PT, typename ET>
 FKeyColumn<IFType>* i_fcol_factory(char data_type,
                                    U32 compress_id,
-                                   void* data_ptr,
+                                   void*& data_ptr,
                                    I32 data_size,
                                    SortedColumn<IFType>* tgt)
 {
@@ -171,7 +171,7 @@ FKeyColumn<IFType>* i_fcol_factory(char data_type,
 template <typename IFType, typename PT, typename ET>
 SortedFKeyColumn<IFType>* i_sfcol_factory(char data_type,
                                           U32 compress_id,
-                                          void* data_ptr,
+                                          void*& data_ptr,
                                           I32 data_size,
                                           SortedColumn<IFType>* tgt)
 {
@@ -184,7 +184,7 @@ SortedFKeyColumn<IFType>* i_sfcol_factory(char data_type,
 template <U32 bytes>
 Column<std::string>* s_col_factory(char data_type,
                                    U32 compress_id,
-                                   void* data_ptr,
+                                   void*& data_ptr,
                                    I32 data_size)
 {
   // struct implementation now ignores data_type and compress_id
@@ -192,14 +192,14 @@ Column<std::string>* s_col_factory(char data_type,
 }
 
 // blob col factory
-template <typename PT, U32 align>
+template <typename BPT, U32 align>
 Column<std::string>* b_col_factory(char data_type,
                                    U32 compress_id,
-                                   void* data_ptr,
+                                   void*& data_ptr,
                                    I32 data_size)
 {
   // struct implementation now ignores data_type and compress_id
-  return new ColumnImpl<std::string, BlobImpl<PT, align> >
+  return new ColumnImpl<std::string, BlobImpl<BPT, align> >
     (data_ptr, data_size);
 }
 

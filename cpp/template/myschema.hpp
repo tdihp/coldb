@@ -73,8 +73,6 @@ public:
         col_def = (char*)col_def + 1;
         compress_id = *((char*)col_def);
         col_def = (char*)col_def + 1;
-        col_size = *((U16*)col_def);
-        col_def = (U16*)col_def + 1;
         {%   if col.fkey -%}
         {%     set tgttable = schema.table_by_name[col.fkey] -%}
         {%     set tgtcol = schema.col_by_uniname[tgttable.pkey] -%}
@@ -102,10 +100,9 @@ public:
         // blob column
         {{col.name}} = b_col_factory<U16, {{align}}>(data_type, compress_id, col_ptr, data_size_);
         {%   endif -%}
-        col_ptr = (U32*)col_ptr + col_size;
         {% endfor %}
       }
-      
+
       ~{{table.name}}()
       {
         {% for col_uniname in table.col_uninames -%}
@@ -126,9 +123,9 @@ public:
   {
     // skip magic word
     buffer = (U32*)buffer + 1;
-    
+
     U16* table_sizes = (U16*)buffer;
-    void* col_def = aligned<U32>(table_sizes + {{tables|length}});
+    void* col_def = aligned<sizeof(ALIGN_T)>(table_sizes + {{tables|length}});
     // get first col_ptr by walk through each table
     U16* _tmp_table_sizes = table_sizes;
     void* col_ptr = col_def; // just initial value, use it to walk
@@ -141,7 +138,7 @@ public:
       col_ptr = (char*)col_ptr + 4 * {{table.col_uninames|length}};
     }
     {% endfor -%}
-    
+
     // initial each table
     _tmp_table_sizes = table_sizes;
     {% for table in tables -%}

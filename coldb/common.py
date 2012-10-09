@@ -10,23 +10,20 @@ ALIGN_CHAR = '\0'
 
 
 # indicate sizes, pointing rows, size_counting
-POINTER_TYPE = 'H'
+POINTER_TYPE = 'I'
 
 # used in enum compression only
 ENUM_TYPE = 'B'
 
-# XXX: not used
-IDX_TYPE = 'H'
-
 # header uses 2 magic words
 S_PACKAGE_HEADER_STRUCT = 'HH'
 # rows
-S_TABLE_HEADER_STRUCT = 'H'
+S_TABLE_HEADER_STRUCT = 'i'
 # data_type, compress_type, size *ALIGN_BYTES to bytes*
 # data_type:
 # same as struct if the type changed
 # '-' if no change at all
-S_COL_HEADER_STRUCT = 'cBH'
+S_COL_HEADER_STRUCT = 'cB'
 
 
 IRANGE_DICT = {
