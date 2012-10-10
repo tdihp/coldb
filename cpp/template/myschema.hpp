@@ -78,18 +78,18 @@ public:
         {%     set tgtcol = schema.col_by_uniname[tgttable.pkey] -%}
         {%     if col.pkey or col.skey -%}
         // sorted fkey column
-        {{col.name}} = i_sfcol_factory<{{DATATYPE2CTYPE[tgtcol.datatype]}}, U16, U8>(data_type, compress_id, col_ptr, data_size_, cur_schema->{{tgttable.name}}_.{{tgtcol.name}});
+        {{col.name}} = i_sfcol_factory<{{DATATYPE2CTYPE[tgtcol.datatype]}}>(data_type, compress_id, col_ptr, data_size_, cur_schema->{{tgttable.name}}_.{{tgtcol.name}});
         {%     else -%}
         // fkey column
-        {{col.name}} = i_fcol_factory<{{DATATYPE2CTYPE[tgtcol.datatype]}}, U16, U8>(data_type, compress_id, col_ptr, data_size_, cur_schema->{{tgttable.name}}_.{{tgtcol.name}});
+        {{col.name}} = i_fcol_factory<{{DATATYPE2CTYPE[tgtcol.datatype]}}>(data_type, compress_id, col_ptr, data_size_, cur_schema->{{tgttable.name}}_.{{tgtcol.name}});
         {%     endif -%}
         {%   elif col.datatype in DATATYPE2CTYPE -%}
         {%     if col.pkey or col.skey -%}
         // sorted column
-        {{col.name}} = i_scol_factory<{{DATATYPE2CTYPE[col.datatype]}}, U16, U8>(data_type, compress_id, col_ptr, data_size_);
+        {{col.name}} = i_scol_factory<{{DATATYPE2CTYPE[col.datatype]}}>(data_type, compress_id, col_ptr, data_size_);
         {%     else -%}
         // normal column
-        {{col.name}} = i_col_factory<{{DATATYPE2CTYPE[col.datatype]}}, U16, U8>(data_type, compress_id, col_ptr, data_size_);
+        {{col.name}} = i_col_factory<{{DATATYPE2CTYPE[col.datatype]}}>(data_type, compress_id, col_ptr, data_size_);
         {%     endif -%}
         {%   elif is_struct_datatype(col.datatype) -%}
         {%     set size = datatype2struct(col.datatype) -%}
@@ -98,7 +98,7 @@ public:
         {%   else -%}
         {%     set align = datatype2blob(col.datatype) -%}
         // blob column
-        {{col.name}} = b_col_factory<U16, {{align}}>(data_type, compress_id, col_ptr, data_size_);
+        {{col.name}} = b_col_factory<{{align}}>(data_type, compress_id, col_ptr, data_size_);
         {%   endif -%}
         {% endfor %}
       }
@@ -124,10 +124,10 @@ public:
     // skip magic word
     buffer = (U32*)buffer + 1;
 
-    U16* table_sizes = (U16*)buffer;
+    U32* table_sizes = (U32*)buffer;
     void* col_def = aligned<sizeof(ALIGN_T)>(table_sizes + {{tables|length}});
     // get first col_ptr by walk through each table
-    U16* _tmp_table_sizes = table_sizes;
+    U32* _tmp_table_sizes = table_sizes;
     void* col_ptr = col_def; // just initial value, use it to walk
     U32 table_size;
     {% for table in tables -%}
@@ -135,7 +135,7 @@ public:
     table_size = *(_tmp_table_sizes++);
     if(table_size)
     {
-      col_ptr = (char*)col_ptr + 4 * {{table.col_uninames|length}};
+      col_ptr = (char*)col_ptr + 2 * {{table.col_uninames|length}};
     }
     {% endfor -%}
 

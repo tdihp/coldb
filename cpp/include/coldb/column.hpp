@@ -310,7 +310,7 @@ struct StructImpl
   StructImpl(void*& data_ptr, I32 data_size)
     : data_size_(data_size), data_ptr_((char*)data_ptr)
   {
-    data_ptr = aligned<ALIGN_T>((void*)(data_ptr_ + (data_size_ * bytes)));
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + (data_size_ * bytes)));
   }
 
   std::string get(I32 rowid)

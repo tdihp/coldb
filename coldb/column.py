@@ -117,7 +117,7 @@ class Column(object):
         #  get blob ptr type
         if is_blob_datatype(self.datatype):
             align = datatype2blob(self.datatype)
-            opts['bpt'] = bptr_type(align)
+            opts['bpt'] = bptr_type(arr, align)
         cf, data = self.try_compress(min_type, arr, **opts)
         store_type = min_type
         if store_type not in ('b', 'B', 'h', 'H', 'i', 'I'):
@@ -129,7 +129,7 @@ class Column(object):
         return store_type, compression_id, data
 
     def try_compress(self, val_type, arr, **opts):
-        plain_data = c_plain(val_type, arr)
+        plain_data = c_plain(val_type, arr, **opts)
         comp_dict = dict()
         for cf in self.compress:
             try:
