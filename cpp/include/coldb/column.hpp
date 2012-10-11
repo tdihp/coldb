@@ -134,6 +134,7 @@ struct PlainImpl
   PlainImpl(void*& data_ptr, I32 data_size)
     : data_ptr_((DT*)data_ptr), data_size_(data_size)
   {
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + data_size_)) - (char*)data_ptr;
     data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + data_size_));
   }
   // TODO: add no such row situation
@@ -165,6 +166,7 @@ struct Run0Impl
     run_cnt_ = *((PT*)data_ptr);
     run_ptr_ = ((PT*)data_ptr) + 1;
     data_ptr_ = (DT*)aligned<sizeof(DT)>((void*)(run_ptr_ + run_cnt_));
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + run_cnt_)) - (char*)data_ptr;
     data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + run_cnt_));
   }
 
@@ -279,7 +281,8 @@ struct EnumImpl
     enum_cnt_ = *((ET*)data_ptr);
     new_val_ptr_ = ((ET*)data_ptr) + 1;
     enum_ptr_ = (DT*)aligned<sizeof(DT)>((void*)(new_val_ptr_ + data_size_));
-    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(enum_ptr_ + data_size_));
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(enum_ptr_ + enum_cnt_)) - (char*)data_ptr;
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(enum_ptr_ + enum_cnt_));
   }
 
   DT get(I32 rowid)
@@ -310,6 +313,7 @@ struct StructImpl
   StructImpl(void*& data_ptr, I32 data_size)
     : data_size_(data_size), data_ptr_((char*)data_ptr)
   {
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + (data_size_ * bytes))) - (char*)data_ptr;
     data_ptr = aligned<sizeof(ALIGN_T)>((void*)(data_ptr_ + (data_size_ * bytes)));
   }
 
@@ -333,6 +337,7 @@ struct BlobImpl
     blob_size_ = *((BPT*)data_ptr);
     offset_ptr_ = ((BPT*)data_ptr) + 1;
     blob_ptr_ = (char*)(offset_ptr_ + data_size_);
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(blob_ptr_ + (blob_size_ * align))) - (char*)data_ptr;
     data_ptr = aligned<sizeof(ALIGN_T)>((void*)(blob_ptr_ + (blob_size_ * align)));
   }
 
