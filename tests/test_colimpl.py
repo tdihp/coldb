@@ -37,7 +37,7 @@ class _TestGetMixin(object):
     def testGet(self):
         for length in self.lengthlist:
             l = _get_data(length, self.datarange)
-            l_data = self.compress_algo(self.col_type, l)
+            l_data = self.compress_algo(self.col_type, l, **self.opts)
             col = self.colimpl(l_data, len(l))
             for i in range(length):
                 self.assertEqual(l[i], col.get(i))
@@ -55,7 +55,7 @@ class _TestFindMixin(object):
     def testFind(self):
         for length in self.lengthlist:
             l = _get_sorted_data(length, self.datarange)
-            l_data = self.compress_algo(self.col_type, l)
+            l_data = self.compress_algo(self.col_type, l, **self.opts)
             col = self.colimpl(l_data, length)
             # test find first
             cur_data = l[0]
@@ -76,6 +76,7 @@ class TestPlain_b(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'b'
         self.colimpl = colimpl.Plain_b
+        self.opts = {}
 
 
 class TestPlain_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -85,6 +86,7 @@ class TestPlain_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'B'
         self.colimpl = colimpl.Plain_B
+        self.opts = {}
 
 
 class TestPlain_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -94,6 +96,7 @@ class TestPlain_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'h'
         self.colimpl = colimpl.Plain_h
+        self.opts = {}
 
 
 class TestPlain_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -103,6 +106,7 @@ class TestPlain_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'H'
         self.colimpl = colimpl.Plain_H
+        self.opts = {}
 
 
 class TestPlain_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -112,6 +116,7 @@ class TestPlain_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'i'
         self.colimpl = colimpl.Plain_i
+        self.opts = {}
 
 
 class TestPlain_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -121,6 +126,7 @@ class TestPlain_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_plain_normal
         self.col_type = 'I'
         self.colimpl = colimpl.Plain_I
+        self.opts = {}
 
 
 class TestRun0_b(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -129,7 +135,8 @@ class TestRun0_b(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'b'
-        self.colimpl = colimpl.Run0_b
+        self.colimpl = colimpl.Run0_bH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun0_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -138,7 +145,8 @@ class TestRun0_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'B'
-        self.colimpl = colimpl.Run0_B
+        self.colimpl = colimpl.Run0_BH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun0_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -147,7 +155,8 @@ class TestRun0_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'h'
-        self.colimpl = colimpl.Run0_h
+        self.colimpl = colimpl.Run0_hH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun0_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -156,7 +165,8 @@ class TestRun0_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'H'
-        self.colimpl = colimpl.Run0_H
+        self.colimpl = colimpl.Run0_HH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun0_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -165,7 +175,8 @@ class TestRun0_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'i'
-        self.colimpl = colimpl.Run0_i
+        self.colimpl = colimpl.Run0_iH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun0_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -174,7 +185,8 @@ class TestRun0_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run0
         self.col_type = 'I'
-        self.colimpl = colimpl.Run0_I
+        self.colimpl = colimpl.Run0_IH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_b(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -183,7 +195,8 @@ class TestRun1_b(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'b'
-        self.colimpl = colimpl.Run1_b
+        self.colimpl = colimpl.Run1_bH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -192,7 +205,8 @@ class TestRun1_B(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'B'
-        self.colimpl = colimpl.Run1_B
+        self.colimpl = colimpl.Run1_BH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -201,7 +215,8 @@ class TestRun1_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'h'
-        self.colimpl = colimpl.Run1_h
+        self.colimpl = colimpl.Run1_hH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -210,7 +225,8 @@ class TestRun1_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'H'
-        self.colimpl = colimpl.Run1_H
+        self.colimpl = colimpl.Run1_HH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -219,7 +235,8 @@ class TestRun1_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'i'
-        self.colimpl = colimpl.Run1_i
+        self.colimpl = colimpl.Run1_iH
+        self.opts = {'pt': 'H'}
 
 
 class TestRun1_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -228,7 +245,8 @@ class TestRun1_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.compress_algo = compress.c_run1
         self.col_type = 'I'
-        self.colimpl = colimpl.Run1_I
+        self.colimpl = colimpl.Run1_IH
+        self.opts = {'pt': 'H'}
 
 
 class TestEnum_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -238,6 +256,7 @@ class TestEnum_h(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_enum
         self.col_type = 'h'
         self.colimpl = colimpl.Enum_h
+        self.opts = {}
 
 
 class TestEnum_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -247,6 +266,7 @@ class TestEnum_H(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_enum
         self.col_type = 'H'
         self.colimpl = colimpl.Enum_H
+        self.opts = {}
 
 
 class TestEnum_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -256,6 +276,7 @@ class TestEnum_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_enum
         self.col_type = 'i'
         self.colimpl = colimpl.Enum_i
+        self.opts = {}
 
 
 class TestEnum_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
@@ -265,6 +286,7 @@ class TestEnum_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.compress_algo = compress.c_enum
         self.col_type = 'I'
         self.colimpl = colimpl.Enum_I
+        self.opts = {}
 
 
 class _TestStruct(object):
@@ -303,7 +325,7 @@ class _TestBlob(object):
         for length in self.lengthlist:
             slens = (random.randint(*self.slenrange) for i in range(length))
             l = list(_get_bytes(self.align * slen) for slen in slens)
-            l_data = compress.c_plain_blob(self.col_type, l)
+            l_data = compress.c_plain_blob(self.col_type, l, **self.opts)
             col = self.colimpl(l_data, length)
             for i, val in enumerate(l):
                 self.assertEqual(val, col.get(i))
@@ -314,8 +336,9 @@ class TestBlob_1(unittest.TestCase, _TestBlob):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.align = 1
         self.col_type = 'blob1'
-        self.colimpl = colimpl.Blob_1
+        self.colimpl = colimpl.Blob_1H
         self.slenrange = (0, 10)
+        self.opts = {'bpt': 'H'}
 
 
 class TestBlob_2(unittest.TestCase, _TestBlob):
@@ -323,8 +346,9 @@ class TestBlob_2(unittest.TestCase, _TestBlob):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.align = 2
         self.col_type = 'blob2'
-        self.colimpl = colimpl.Blob_2
+        self.colimpl = colimpl.Blob_2H
         self.slenrange = (0, 10)
+        self.opts = {'bpt': 'H'}
 
 
 class TestBlob_4(unittest.TestCase, _TestBlob):
@@ -332,5 +356,6 @@ class TestBlob_4(unittest.TestCase, _TestBlob):
         self.lengthlist = [1, 10, 100, 1000, 10000]
         self.align = 4
         self.col_type = 'blob4'
-        self.colimpl = colimpl.Blob_4
+        self.colimpl = colimpl.Blob_4H
         self.slenrange = (0, 10)
+        self.opts = {'bpt': 'H'}
