@@ -138,6 +138,7 @@ public:
       col_ptr = (char*)col_ptr + 2 * {{table.col_uninames|length}};
     }
     {% endfor -%}
+    col_ptr = aligned<sizeof(ALIGN_T)>(col_ptr);
 
     // initial each table
     _tmp_table_sizes = table_sizes;
