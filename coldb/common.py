@@ -15,6 +15,8 @@ POINTER_TYPE = 'I'
 # used in enum compression only
 ENUM_TYPE = 'B'
 
+FRAMEVAL_TYPE = 'H'
+
 # header uses 2 magic words
 S_PACKAGE_HEADER_STRUCT = 'HH'
 # rows

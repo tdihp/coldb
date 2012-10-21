@@ -7,8 +7,8 @@ import re
 import struct
 from cStringIO import StringIO
 
-from .algorithm import run, enum, array_packing
-from .common import ENUM_TYPE, IRANGE_DICT
+from .algorithm import run, enum, frame, array_packing
+from .common import ENUM_TYPE, FRAMEVAL_TYPE, IRANGE_DICT
 
 
 class CompressFailed(Exception):
@@ -103,4 +103,16 @@ def c_enum(col_type, col, **kw):
         raise CompressFailed("too many values for enum!")
     result = array_packing((ENUM_TYPE, [enumcnt] + newvallist),
                            (col_type, enumlist))
+    return result
+
+
+def c_frame(col_type, col, pt, **kw):
+    if not col_type in ('b', 'B', 'h', 'H', 'i', 'I'):
+        raise CompressError("col type %s cannot do enum" % col_type)
+    if not col_type in ('i', 'I'):
+        raise CompressFailed("Only 4-byte data can use frame compress")
+    rowlist, framelist, newvallist = frame(0x10000, col)
+    result = array_packing((pt, [len(rowlist)] + rowlist),
+                           (col_type, framelist),
+                           (FRAMEVAL_TYPE, newvallist))
     return result

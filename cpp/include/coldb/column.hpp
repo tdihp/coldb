@@ -304,6 +304,88 @@ struct EnumImpl
   }
 };
 
+template <typename DT, typename PT, typename FT>
+struct FrameImpl
+{
+  I32 data_size_;
+  I32 frame_cnt_;
+  PT* row_ptr_;
+  DT* frame_ptr_;
+  FT* val_ptr_;
+
+  FrameImpl(void*& data_ptr, I32 data_size)
+    : data_size_(data_size)
+  {
+    frame_cnt_ = *((PT*)data_ptr);
+    row_ptr_ = (PT*)data_ptr + 1;
+    frame_ptr_ = (DT*)(aligned<sizeof(DT)>((void*)(row_ptr_ + frame_cnt_)));
+    val_ptr_ = (FT*)(frame_ptr_ + frame_cnt_);  // NOTE: FT is supposed to be smaller, no align needed
+    //int dbg_size = (char*)aligned<sizeof(ALIGN_T)>((void*)(val_ptr_ + data_size_)) - (char*)data_ptr;
+    data_ptr = aligned<sizeof(ALIGN_T)>((void*)(val_ptr_ + data_size_));
+  }
+
+  DT get(I32 rowid)
+  {
+    // find the frame of the row
+    PT* i_row = std::lower_bound(row_ptr_, row_ptr_ + frame_cnt_, rowid);
+    if(*i_row != rowid)
+    {
+      i_row++;
+    }
+    I32 i = i_row - row_ptr_;
+    DT frame = frame_ptr_[i];
+    return frame + val_ptr_[rowid];
+  }
+
+  I32 find(DT var)
+  {
+    DT* src_end = frame_ptr_ + frame_cnt_;
+    DT* i_frame = std::lower_bound(frame_ptr_, frame_ptr_ + frame_cnt_, var);
+    if(i_frame == src_end)
+    {
+      --i_frame;
+    }
+    else
+    {
+      if(*i_frame == var)
+      {
+        return row_ptr_[i_frame - frame_ptr_];
+      }
+      if(i_frame == frame_ptr_)
+      {
+        return -1;
+      }
+      --i_frame;
+    }
+    DT diff = var - *i_frame;
+    if (diff >= 0x10000)  // NOTE: hard coded for U16 FT
+    {
+      return -1;
+    }
+    I32 fi = i_frame - frame_ptr_;
+    FT* begin = val_ptr_ + row_ptr_[fi];
+    FT* end;
+    if(fi == frame_cnt_ - 1)
+    {
+      end = val_ptr_ + data_size_;
+    }
+    else
+    {
+      end = begin + row_ptr_[fi + 1];
+    }
+    FT* res = std::lower_bound(begin, end, diff);
+    if(res == end)
+    {
+      return -1;
+    }
+    if(*res != diff)
+    {
+      return -1;
+    }
+    return res - val_ptr_;
+  }
+}
+
 template <U32 bytes>
 struct StructImpl
 {
