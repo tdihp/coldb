@@ -64,7 +64,7 @@ class _TestFindMixin(object):
             for i, cur_data in enumerate(l[1:], 1):
                 if cur_data == last_data:
                     continue
-#                self.assertEqual(i, col.find(cur_data), "%d, %d, %d, %s" % (i, col.find(cur_data), cur_data, l))
+                #self.assertEqual(i, col.find(cur_data), "%d, %d, %d, %s" % (i, col.find(cur_data), cur_data, l))
                 self.assertEqual(i, col.find(cur_data))
                 last_data = cur_data
 
@@ -287,6 +287,26 @@ class TestEnum_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
         self.col_type = 'I'
         self.colimpl = colimpl.Enum_I
         self.opts = {}
+
+
+class TestFrame_i(unittest.TestCase, _TestGetMixin, _TestFindMixin):
+    def setUp(self):
+        self.datarange = (-2 ** 31, 2 ** 31)
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.compress_algo = compress.c_frame
+        self.col_type = 'i'
+        self.colimpl = colimpl.Frame_iH
+        self.opts = {'pt': 'H'}
+
+
+class TestFrame_I(unittest.TestCase, _TestGetMixin, _TestFindMixin):
+    def setUp(self):
+        self.datarange = (0, 2 ** 32)
+        self.lengthlist = [1, 10, 100, 1000, 10000]
+        self.compress_algo = compress.c_frame
+        self.col_type = 'I'
+        self.colimpl = colimpl.Frame_IH
+        self.opts = {'pt': 'H'}
 
 
 class _TestStruct(object):

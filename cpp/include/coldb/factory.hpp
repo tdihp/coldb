@@ -29,6 +29,8 @@ IF<IFType>* _i_col_factory_l2(U32 compress_id,
       return new IFImpl<IFType, Run1Impl<DT, PT> >(data_ptr, data_size);
     case ENUM:
       return new IFImpl<IFType, EnumImpl<DT, ET> >(data_ptr, data_size);
+    case FRAME:
+      return new IFImpl<IFType, FrameImpl<DT, PT, U16> >(data_ptr, data_size);
     default:
       return 0;  // TODO: exception throw
   }
@@ -137,6 +139,8 @@ IF<IFType>* _i_fcol_factory_l2(U32 compress_id,
       return new IFImpl<IFType, Run1Impl<DT, PT> >(data_ptr, data_size, tgt);
     case ENUM:
       return new IFImpl<IFType, EnumImpl<DT, ET> >(data_ptr, data_size, tgt);
+    case FRAME:
+      return new IFImpl<IFType, FrameImpl<DT, PT, U16> >(data_ptr, data_size, tgt);
     default:
       return 0;  // TODO: exception throw
   }

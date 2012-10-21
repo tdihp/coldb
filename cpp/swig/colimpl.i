@@ -74,6 +74,15 @@ using namespace coldb;
 %template(Enum_i) EnumImpl<I32, U8>;
 %template(Enum_I) EnumImpl<U32, U8>;
 
+%template(Frame_iB) FrameImpl<I32, U8, U16>;
+%template(Frame_IB) FrameImpl<U32, U8, U16>;
+
+%template(Frame_iH) FrameImpl<I32, U16, U16>;
+%template(Frame_IH) FrameImpl<U32, U16, U16>;
+
+%template(Frame_iI) FrameImpl<I32, U32, U16>;
+%template(Frame_II) FrameImpl<U32, U32, U16>;
+
 %template(Struct_7) StructImpl<7>;
 %template(Struct_8) StructImpl<8>;
 

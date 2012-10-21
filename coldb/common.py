@@ -42,6 +42,7 @@ COMPRESS_TYPES = [
     'run0',
     'run1',
     'enum',
+    'frame',
 ]
 
 BLOB_CTYPE2BPTR = {

@@ -330,7 +330,7 @@ struct FrameImpl
     PT* i_row = std::lower_bound(row_ptr_, row_ptr_ + frame_cnt_, rowid);
     if(*i_row != rowid)
     {
-      i_row++;
+      --i_row;
     }
     I32 i = i_row - row_ptr_;
     DT frame = frame_ptr_[i];
@@ -357,10 +357,10 @@ struct FrameImpl
       }
       --i_frame;
     }
-    DT diff = var - *i_frame;
+    U32 diff = var - *i_frame;
     if (diff >= 0x10000)  // NOTE: hard coded for U16 FT
     {
-      return -1;
+      return -2;
     }
     I32 fi = i_frame - frame_ptr_;
     FT* begin = val_ptr_ + row_ptr_[fi];
@@ -371,20 +371,20 @@ struct FrameImpl
     }
     else
     {
-      end = begin + row_ptr_[fi + 1];
+      end = val_ptr_ + row_ptr_[fi + 1];
     }
     FT* res = std::lower_bound(begin, end, diff);
     if(res == end)
     {
-      return -1;
+      return -3;
     }
     if(*res != diff)
     {
-      return -1;
+      return -4;
     }
     return res - val_ptr_;
   }
-}
+};
 
 template <U32 bytes>
 struct StructImpl
