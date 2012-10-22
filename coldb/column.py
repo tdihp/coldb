@@ -10,7 +10,7 @@ from .common import COMPRESS_TYPES
 from .common import ALIGN_BYTES
 from .common import uniname2name, is_blob_datatype, datatype2blob
 from .common import BLOB_CTYPE2BPTR
-from .compress import c_plain, c_run0, c_run1, c_enum
+from .compress import c_plain, c_run0, c_run1, c_enum, c_frame
 from .compress import CompressFailed
 from .algorithm import minimum_type
 from .algorithm import pitched_len
@@ -20,6 +20,7 @@ COMPRESS_OPS = {
     'run0': c_run0,
     'run1': c_run1,
     'enum': c_enum,
+    'frame': c_frame,
 }
 
 
