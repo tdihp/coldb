@@ -26,6 +26,6 @@ typedef enum E_COMPRESS
   FRAME = 4
 } E_COMPRESS;
 
-}
+};
 #endif
 

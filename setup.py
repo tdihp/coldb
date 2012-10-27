@@ -50,8 +50,12 @@ setup(
     packages=packages,
     ext_modules=[Extension('coldb._colimpl', ['./cpp/swig/colimpl.i'],
                            swig_opts=['-outdir', './coldb', '-c++', '-I./cpp/include', ],
-                           include_dirs=['./cpp/include']),],
-    py_modules=['coldb.colimpl']
+                           include_dirs=['./cpp/include']),
+                 Extension('coldb._rangecodec', ['./cpp/swig/rangecodec.i'],
+                           swig_opts=['-outdir', './coldb', '-c++', '-I./cpp/include', ],
+                           include_dirs=['./cpp/include']),
+                ],
+    py_modules=['coldb.colimpl', 'coldb.rangecodec']
 )
 
 
