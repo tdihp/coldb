@@ -34,5 +34,5 @@ private:
 using namespace coldb;
 
 
-%template(RangeCore) RangeCore<10, StrStream, unsigned long long>;
-
+%template(REncoder) REncoder<StrStream, 10>;
+%template(RDecoder) RDecoder<StrStream, 10>;

@@ -2,93 +2,183 @@
 #define INCLUDED_COLDB_RANGECODEC_HPP
 
 #include "types.hpp"
-
+#include <stdio.h>
 
 namespace coldb{
 
-template<U32 RANGE_SIZE, typename STREAM, typename CT>
-class RangeCore
+struct RangeCore
 {
-public:
-  RangeCore(STREAM* buf)
-    : buf_(buf),
-      lo_(0),
-      mid_(0),
-      hi_(MASK)
+  static const U32 CODE_BITS = 32;
+  static const U32 SHIFT_BITS = CODE_BITS - 9;
+  static const U32 EXTRA_BITS = ((CODE_BITS-2) % 8 + 1);
+  static const U32 TOP_VAL = 1 << (CODE_BITS - 1);
+  static const U32 BOTTOM_VAL = TOP_VAL >> 8;
+
+  U32 lo_, range_, help_;
+  U32 cnt_;
+  U8 cbuff_;
+
+  RangeCore(U32 lo, U32 range, U32 help, U32 cnt, U8 cbuff)
+    : lo_(lo),
+      range_(range),
+      help_(help),
+      cnt_(cnt),
+      cbuff_(cbuff) {}
+};
+
+template<typename Stream, U32 FREQ_BITS>
+struct REncoder : public RangeCore
+{
+  Stream* buf_; //served as IO
+
+  REncoder(Stream* buf)
+    : RangeCore(0, TOP_VAL, 0, 0, 0), buf_(buf)
   {}
-  ~RangeCore(){}
-  void update(U32 cmin, U32 cmax)
-  {
-    CT range = hi_ - lo_;
-    hi_ = lo_ + ((range * cmax) >> RANGE_SIZE);
-    lo_ += ((range * cmin) >> RANGE_SIZE) + 1;
-  }
 
-  void enc(U32 cmin, U32 cmax)
+  // normalize
+  void norm()
   {
-    update(cmin, cmax);
-    if((hi_ - lo_) < RANGE_LIMIT)
+    while(range_ < BOTTOM_VAL)
     {
-      hi_ = lo_;
-    }
-    while(!((lo_ ^ hi_) >> SHIFT))
-    {
-      buf_->put((U8)(lo_ >> SHIFT));
-      lo_ <<= 8;
-      hi_ = (hi_ << 8) | 0xff;
-    }
-    lo_ &= MASK;
-    hi_ &= MASK;
-  }
-
-  void dec(U32 cmin, U32 cmax)
-  {
-    update(cmin, cmax);
-    if((hi_ - lo_) < RANGE_LIMIT)
-    {
-      hi_ = lo_;
-    }
-    while(!((lo_ ^ hi_) >> SHIFT))
-    {
-      lo_ <<= 8;
-      hi_ = (hi_ << 8) | 0xff;
-      mid_ = (mid_ << 8) | (U8)(buf_->get());
-    }
-    lo_ &= MASK;
-    hi_ &= MASK;
-    mid_ &= MASK;
-  }
-
-  void encFlush()
-  {
-    lo_ += 1;
-    for(U32 i = BYTES_IN_BUFFER; i; --i)
-    {
-      buf_->put((U8)(lo_ >> SHIFT));
-      lo_ <<= 8;
+      
+      if (lo_ < (0xff << SHIFT_BITS)) // normal path
+      {
+        printf("1");
+        buf_->put(cbuff_);
+        for(; help_; --help_)
+        {
+          buf_->put(0xff);
+        }
+        cbuff_ = (U8)(lo_ >> SHIFT_BITS);
+      }
+      else // overflow path
+      {
+        if(lo_ & TOP_VAL) // first  bit is 1
+        {
+          printf("2");
+          buf_->put(cbuff_ + 1); // add 1 because???
+          for(; help_; --help_)
+          {
+            buf_->put(0); // related to +1 ?
+          }
+          cbuff_ = (U8)(lo_ >> SHIFT_BITS);
+        }
+        else // first bit is 0
+        {
+          printf("3");
+          ++help_;
+        }
+      }
+      range_ <<= 8;
+      lo_  = (lo_ << 8) & (TOP_VAL - 1); // masking
+      ++cnt_;
     }
   }
 
-  void decInit()
+  // encode a symbol
+  void enc(U32 cmin, U32 csize)
   {
-	  for(U32 i = BYTES_IN_BUFFER; i; --i)
-	  {
-		  mid_ = (mid_ << 8) | (U8)(buf_->get());
-	  }
+    U32 r;
+    U32 tmp;
+    norm();
+    r = range_ >> FREQ_BITS;
+    tmp = r * cmin;
+    lo_ += tmp; // overflow from here?
+    if((cmin + csize) >> FREQ_BITS)
+    {
+      range_ -= tmp;  
+    }
+    else
+    {
+      range_ = r * csize;
+    }
   }
 
-  U32 decGetMid()
+  void flush()
   {
-    return ((mid_ - lo_) << RANGE_SIZE) / (hi_ - lo_);
+    U32 tmp;
+    tmp = (lo_ >> SHIFT_BITS);
+    cnt_ += 5;
+    
+    if((lo_ & (BOTTOM_VAL - 1)) < ((cnt_ & 0xffffff) >> 1))
+    {
+      tmp = lo_ >> SHIFT_BITS;
+    }
+    else
+    {
+      tmp = (lo_ >> SHIFT_BITS) + 1;
+    }
+    if(tmp > 0xff) // overflow
+    {
+      buf_->put(cbuff_ + 1);
+      for(; help_; --help_)
+      {
+        buf_->put(0);
+      }
+    }
+    else
+    {
+      buf_->put(cbuff_);
+      for(; help_; --help_)
+      {
+        buf_->put(0xff);
+      }
+    }
+    buf_->put(cbuff_ & 0xff);
+    buf_->put((cnt_>>16) & 0xff);
+    buf_->put((cnt_>>8) & 0xff);
+    buf_->put(cnt_ & 0xff);
+    printf("flushed!\n");
+  }
+};
+
+template<typename Stream, U32 FREQ_BITS>
+struct RDecoder : public RangeCore
+{
+  Stream* buf_; //served as IO
+
+  RDecoder(Stream* buf)
+    : RangeCore(0, 0, 0, 0, 0), buf_(buf)
+  {
+    cbuff_ = buf_->get(); // at least 1 bit input required
+    lo_ = cbuff_ >> (8 - EXTRA_BITS);
+    range_ = 1 << EXTRA_BITS;
   }
 
-private:
-  static const U32 BYTES_IN_BUFFER = (sizeof(CT) * 8 - RANGE_SIZE) / 8;
-  static const U32 SHIFT = (BYTES_IN_BUFFER - 1) * 8;
-  static const CT RANGE_LIMIT = (CT)(1) << RANGE_SIZE;
-  static const CT MASK = ((CT)(1) << (BYTES_IN_BUFFER * 8)) - 1;
-  STREAM* buf_; //served as IO
-  CT lo_, hi_, mid_;
+  void norm()
+  {
+    while (range_ <= BOTTOM_VAL)
+    {
+      lo_ = (lo_ << 8) | ((cbuff_ << EXTRA_BITS) & 0xff);
+      cbuff_ = buf_->get();
+      lo_ |= cbuff_ >> (8 - EXTRA_BITS);
+      range_ <<= 8;
+    }
+  }
+
+  U32 mid()
+  {
+    U32 tmp;
+    norm();
+    help_ = range_ >> FREQ_BITS;
+    tmp = lo_ / help_; // true division!
+    return ((tmp >= (1 << FREQ_BITS)) ? ((1 << FREQ_BITS) - 1) : tmp);
+  }
+
+  void dec(U32 cmin, U32 csize)
+  {
+    U32 tmp;
+    tmp = help_ * cmin;
+    lo_ -= tmp;
+    if((cmin + csize) < (1 << FREQ_BITS))
+    {
+      range_ = help_ * csize;
+    }
+    else
+    {
+      range_ -= tmp;
+    }
+  }
 };
 
 };

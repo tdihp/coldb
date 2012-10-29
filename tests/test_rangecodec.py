@@ -1,4 +1,4 @@
-from coldb.rangecodec import RangeCore, StrStream
+from coldb.rangecodec import REncoder, RDecoder, StrStream
 
 def entropy(cntdict, climit=512, total=1024):
     """
@@ -65,7 +65,7 @@ def main():
  Hrothgar, of the prowess of Beowulf, and of the feelings that stirred the\
  hearts of our forefathers in their primeval homes."""
 
-    #text = "ABCCCCDDDDDDDeeeeeeeeeeeee"* 10000
+    text = "ABCCCCDDDDDDDeeeeeeeeeeeee"* 10
 
     cntarr = [0] * 256
     for c in text:
@@ -81,27 +81,35 @@ def main():
 
     # encode
     buffer = StrStream("")
-    core = RangeCore(buffer)
+    encoder = REncoder(buffer)
     for c in text:
         i = char2i[c]
-        core.enc(ladder[i], ladder[i + 1])
-    core.encFlush()
-    print len(buffer.getStr())
+        encoder.enc(ladder[i], ladder[i + 1] - ladder[i])
+    encoder.flush()
+    encoded = buffer.getStr()[1:]
+    print "encoded len:", len(encoded)
     # decode
-    buffer = StrStream(buffer.getStr())
-    core = RangeCore(buffer)
-    core.decInit()
+    buffer = StrStream(encoded)
+    decoder = RDecoder(buffer)
     deced = []
     for _t in range(len(text)):
-        mid = core.decGetMid()
+        mid = decoder.mid()
         i = lookup[mid]
+
+        if lchars[i] != text[len(deced)]:
+            print "error:", i, lchars[i], buffer.getI()
+
         deced.append(lchars[i])
-        core.dec(ladder[i], ladder[i + 1])
+
+        decoder.dec(ladder[i], ladder[i + 1] - ladder[i])
 
     outtext = ''.join(deced)
-    assert outtext == text
     print "i:", buffer.getI()
     print len(text)
+    print outtext
+    print text
+    assert outtext == text
+
 
 if __name__ == '__main__':
     main()
