@@ -38,10 +38,9 @@ struct REncoder : public RangeCore
   // normalize
   void norm()
   {
-    while(range_ < BOTTOM_VAL)
+    while(range_ <= BOTTOM_VAL)
     {
-      
-      if (lo_ < (0xff << SHIFT_BITS)) // normal path
+      if (lo_ < ((U32)0xff << SHIFT_BITS)) // normal path
       {
         printf("1");
         buf_->put(cbuff_);
@@ -97,7 +96,8 @@ struct REncoder : public RangeCore
   void flush()
   {
     U32 tmp;
-    tmp = (lo_ >> SHIFT_BITS);
+    norm();
+    // tmp = (lo_ >> SHIFT_BITS);
     cnt_ += 5;
     
     if((lo_ & (BOTTOM_VAL - 1)) < ((cnt_ & 0xffffff) >> 1))
@@ -124,7 +124,7 @@ struct REncoder : public RangeCore
         buf_->put(0xff);
       }
     }
-    buf_->put(cbuff_ & 0xff);
+    buf_->put(tmp & 0xff);
     buf_->put((cnt_>>16) & 0xff);
     buf_->put((cnt_>>8) & 0xff);
     buf_->put(cnt_ & 0xff);
@@ -162,7 +162,7 @@ struct RDecoder : public RangeCore
     norm();
     help_ = range_ >> FREQ_BITS;
     tmp = lo_ / help_; // true division!
-    return ((tmp >= (1 << FREQ_BITS)) ? ((1 << FREQ_BITS) - 1) : tmp);
+    return ((tmp>>FREQ_BITS) ? ((1 << FREQ_BITS) - 1) : tmp);
   }
 
   void dec(U32 cmin, U32 csize)
@@ -170,7 +170,7 @@ struct RDecoder : public RangeCore
     U32 tmp;
     tmp = help_ * cmin;
     lo_ -= tmp;
-    if((cmin + csize) < (1 << FREQ_BITS))
+    if(!((cmin + csize) >> FREQ_BITS))
     {
       range_ = help_ * csize;
     }
