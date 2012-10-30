@@ -15,14 +15,12 @@ struct RangeCore
   static const U32 BOTTOM_VAL = TOP_VAL >> 8;
 
   U32 lo_, range_, help_;
-  U32 cnt_;
   U8 cbuff_;
 
-  RangeCore(U32 lo, U32 range, U32 help, U32 cnt, U8 cbuff)
+  RangeCore(U32 lo, U32 range, U32 help, U8 cbuff)
     : lo_(lo),
       range_(range),
       help_(help),
-      cnt_(cnt),
       cbuff_(cbuff) {}
 };
 
@@ -32,7 +30,7 @@ struct REncoder : public RangeCore
   Stream* buf_; //served as IO
 
   REncoder(Stream* buf)
-    : RangeCore(0, TOP_VAL, 0, 0, 0), buf_(buf)
+    : RangeCore(0, TOP_VAL, 0, 0), buf_(buf)
   {}
 
   // normalize
@@ -42,7 +40,6 @@ struct REncoder : public RangeCore
     {
       if (lo_ < ((U32)0xff << SHIFT_BITS)) // normal path
       {
-        printf("1");
         buf_->put(cbuff_);
         for(; help_; --help_)
         {
@@ -54,7 +51,6 @@ struct REncoder : public RangeCore
       {
         if(lo_ & TOP_VAL) // first  bit is 1
         {
-          printf("2");
           buf_->put(cbuff_ + 1); // add 1 because???
           for(; help_; --help_)
           {
@@ -64,13 +60,11 @@ struct REncoder : public RangeCore
         }
         else // first bit is 0
         {
-          printf("3");
           ++help_;
         }
       }
       range_ <<= 8;
       lo_  = (lo_ << 8) & (TOP_VAL - 1); // masking
-      ++cnt_;
     }
   }
 
@@ -97,17 +91,9 @@ struct REncoder : public RangeCore
   {
     U32 tmp;
     norm();
-    // tmp = (lo_ >> SHIFT_BITS);
-    cnt_ += 5;
-    
-    if((lo_ & (BOTTOM_VAL - 1)) < ((cnt_ & 0xffffff) >> 1))
-    {
-      tmp = lo_ >> SHIFT_BITS;
-    }
-    else
-    {
-      tmp = (lo_ >> SHIFT_BITS) + 1;
-    }
+
+    tmp = (lo_ >> SHIFT_BITS) + 1;
+
     if(tmp > 0xff) // overflow
     {
       buf_->put(cbuff_ + 1);
@@ -125,10 +111,6 @@ struct REncoder : public RangeCore
       }
     }
     buf_->put(tmp & 0xff);
-    buf_->put((cnt_>>16) & 0xff);
-    buf_->put((cnt_>>8) & 0xff);
-    buf_->put(cnt_ & 0xff);
-    printf("flushed!\n");
   }
 };
 
@@ -138,7 +120,7 @@ struct RDecoder : public RangeCore
   Stream* buf_; //served as IO
 
   RDecoder(Stream* buf)
-    : RangeCore(0, 0, 0, 0, 0), buf_(buf)
+    : RangeCore(0, 0, 0, 0), buf_(buf)
   {
     cbuff_ = buf_->get(); // at least 1 bit input required
     lo_ = cbuff_ >> (8 - EXTRA_BITS);

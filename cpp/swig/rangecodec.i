@@ -21,10 +21,10 @@ public:
   int get()
   {
     if(i_ < str_.size())
-//    {
+    {
       return str_[i_++];
-//    }
-//    return 0xFF;
+    }
+    return 0;
   }
   std::string getStr() {return str_;}
   U32 getI() {return i_;}
