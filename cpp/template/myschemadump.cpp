@@ -40,10 +40,11 @@ string write_escaped(string const& s)
   return out.str();
 }
 
-int main() {
-  ifstream file ("sampledata.dat", ios::in|ios::binary|ios::ate);
+int dump_file(char* fname) {
+  ifstream file (fname, ios::in|ios::binary|ios::ate);
   if (file.is_open())
   {
+	cout << "dumping " << fname << endl;
     size = file.tellg();
     memblock = new char [size];
     file.seekg (0, ios::beg);
@@ -71,9 +72,17 @@ int main() {
       << endl;
     }
     {% endfor -%}
-    
+
     delete[] memblock;
   }
-  else cout << "Unable to open file";
+  else cout << "Unable to open file " << fname << endl ;
+}
+
+int main(int argc, char* argv[]) {
+  if (argc > 1){
+    for(int i = 1; i < argc; ++i) {
+    	dump_file(argv[i]);
+    }
+  }
   return 0;
 }
